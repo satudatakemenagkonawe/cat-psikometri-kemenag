@@ -39,21 +39,16 @@ def transform_ke_100(theta):
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
 # --- FUNGSI AMBIL SOAL DARI GOOGLE SHEETS ---
-@st.cache_data(ttl=600) # Simpan di memori selama 10 menit agar tidak terus-menerus memanggil API
+@st.cache_data(ttl=60) # Data akan diperbarui setiap 1 menit
 def ambil_bank_soal():
-    url_script = "URL_WEB_APP_APPS_SCRIPT_ANDA"
-    try:
-        response = requests.get(url_script)
-        if response.status_code == 200:
-            return response.json()
-    except:
-        return []
-# --- DI DALAM LOGIKA APLIKASI ---
-if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
-    data_soal = ambil_bank_soal()
-    if data_soal:
-        st.session_state.bank_soal = data_soal
+    url_script = "https://script.google.com/macros/s/AKfycbzBIfWRSyKF4xzPgoAhlgT5_2GMs-VRBo7QtuzIj3_Mgs7tnLTCZRo0ymt9iIwpS6E_mg/exec"
+response = requests.get(url_script)
+    return response.json()
 
+# Di bagian inisialisasi soal:
+if 'bank_soal' not in st.session_state:
+    st.session_state.bank_soal = ambil_bank_soal()
+    
 # --- 4. LOGIKA HALAMAN ---
 if not st.session_state.identitas_siap:
     # HALAMAN LOGIN
@@ -136,10 +131,4 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
-        
-
-
-
-
-
 
