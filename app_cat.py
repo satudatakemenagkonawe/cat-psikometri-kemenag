@@ -88,7 +88,7 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     except:
         return False
 # --- 4. TAMPILAN ANTARMUKA ---
-st.title("🛡️ TES ONLINE-CAT")
+st.title("🛡️ Tes Oline-CAT")
 
 if not st.session_state.identitas_siap:
     with st.form("identitas"):
@@ -165,6 +165,7 @@ else:
             st.session_state.sent = True
         
         st.info("SELAMAT... Data detail hasil tes telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
 
