@@ -68,13 +68,23 @@ def transform_ke_100(theta):
     theta_clipped = np.clip(theta, theta_min, theta_max)
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
-def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "https://script.google.com/macros/s/AKfycbwgDIQ49leiy9-TBJgI3UhmE4a974UCyZKAnfoTkOxPembnfbZ8Q5r4TXpN54QoVidYBQ/exec" # Ganti dengan URL Apps Script Anda
-    payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
+# --- FUNGSI AMBIL SOAL DARI GOOGLE SHEETS ---
+@st.cache_data(ttl=600) # Simpan di memori selama 10 menit agar tidak terus-menerus memanggil API
+def ambil_bank_soal():
+    url_script = "URL_WEB_APP_APPS_SCRIPT_ANDA"
     try:
-        requests.post(url_script, json=payload)
-        return True
-    except: return False
+        response = requests.get(url_script)
+        if response.status_code == 200:
+            return response.json()
+    except:
+        return []
+# --- DI DALAM LOGIKA APLIKASI ---
+if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
+    data_soal = ambil_bank_soal()
+    if data_soal:
+        st.session_state.bank_soal = data_soal
+    else:
+        st.error("Gagal memuat Bank Soal. Periksa koneksi atau URL Apps Script.")
 
 # --- 4. LOGIKA HALAMAN ---
 if not st.session_state.identitas_siap:
@@ -159,6 +169,7 @@ else:
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
         
+
 
 
 
