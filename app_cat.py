@@ -72,6 +72,18 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem):
         return True
     except: return False
 
+def transform_ke_100(theta):
+    # Kita asumsikan rentang theta yang masuk akal adalah -3 sampai 3
+    theta_min = -3.0
+    theta_max = 3.0
+    
+    # Menjaga agar theta tidak keluar dari batas saat perhitungan
+    theta_clipped = np.clip(theta, theta_min, theta_max)
+    
+    # Rumus transformasi linier
+    skor = ((theta_clipped - theta_min) / (theta_max - theta_min)) * 100
+    return round(skor, 2)
+
 # --- 4. TAMPILAN ANTARMUKA ---
 st.title("🚀 CAT Psikometri Kemenag Konawe")
 
@@ -114,17 +126,17 @@ else:
             st.session_state.index_soal += 1
             st.rerun()
     else:
-        # --- HALAMAN SELESAI ---
-        st.success("Tes Selesai! Skor Anda sedang diproses...")
-        rel = st.session_state.total_info / (st.session_state.total_info + 1)
-        sem = 1 / np.sqrt(st.session_state.total_info)
-        
-        if 'sent' not in st.session_state:
-            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem)
-            st.session_state.sent = True
-            st.balloons()
-            
-        st.metric("Estimasi Kemampuan (θ)", f"{st.session_state.theta:.3f}")
-        st.write(f"Reliabilitas Marginal: **{rel:.3f}**")
+# --- DI HALAMAN SELESAI ---
+skor_akhir = transform_ke_100(st.session_state.theta)
+st.metric("Skor Akhir (0-100)", f"{skor_akhir}")
 
-
+if 'sent' not in st.session_state:
+    # Kirim skor_akhir (0-100) ke Google Sheets agar data di kantor seragam
+    kirim_ke_sheets(
+        st.session_state.nama, 
+        st.session_state.nip, 
+        skor_akhir, # Kita kirim skor yang sudah 0-100
+        rel, 
+        sem
+    )
+    st.session_state.sent = True
