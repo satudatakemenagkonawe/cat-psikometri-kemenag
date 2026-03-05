@@ -69,15 +69,6 @@ def kirim_ke_google_sheets(nama, no_peserta, theta, rel, sem):
         return response.status_code == 200
     except:
         return False
-
-# --- FORMULIR IDENTITAS ---
-if 'identitas_siap' not in st.session_state:
-    st.session_state.identitas_siap = False
-
-if not st.session_state.identitas_siap:
-    st.title("📝 Identitas Peserta Tes")
-    st.info("Silakan isi data diri Anda sebelum memulai TES.")
-    
 else:
     # --- LOGIKA TES ANDA (Yang sudah kita buat sebelumnya) ---
     st.sidebar.title("👤 Profil Peserta")
