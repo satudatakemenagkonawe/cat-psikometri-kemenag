@@ -25,35 +25,35 @@ bank_soal = [
         "teks": "Dalam situasi konflik antar bawahan, tindakan pertama Anda adalah...",
         "opsi": ["A. Membiarkan mereka", "B. Memanggil kedua belah pihak", "C. Melapor ke atasan", "D. Memberi sanksi"],
         "kunci": "B",
-        "a": 1.65, "b": -1.20, "c": 0.22  # Soal Mudah, Daya Beda Tinggi
+        "a": 0.65, "b": 0.20, "c": 0.22, "D": 0.15  # Soal Mudah, Daya Beda Tinggi
     },
     {
         "id": 2, 
         "teks": "Bagaimana cara Anda menyikapi perubahan mendadak dalam prosedur kerja?",
         "opsi": ["A. Menolak", "B. Mengikuti saja", "C. Mempelajari dan beradaptasi", "D. Mengeluh"],
         "kunci": "C",
-        "a": 1.40, "b": -0.40, "c": 0.20  # Soal Menengah-Mudah
+        "a": 0.20, "b": 0.30, "c": 0.40, "D": 0.10  # Soal Menengah-Mudah
     },
     {
         "id": 3, 
         "teks": "Prioritas utama dalam memberikan pelayanan publik menurut Anda adalah...",
         "opsi": ["A. Kecepatan", "B. Kepuasan pelanggan", "C. Prosedur formal", "D. Kenyamanan petugas"],
         "kunci": "B",
-        "a": 1.90, "b": 0.60, "c": 0.18   # Soal Menengah-Sulit, Sangat Diskriminatif
+        "a": 0.20, "b": 0.50, "c": 0.10, "c": 0.10   # Soal Menengah-Sulit, Sangat Diskriminatif
     },
     {
         "id": 4, 
         "teks": "Menghadapi rekan kerja yang berasal dari latar belakang budaya berbeda, Anda akan...",
         "opsi": ["A. Bersikap acuh", "B. Menghargai perbedaan", "C. Menghindari", "D. Meminta pindah divisi"],
         "kunci": "B",
-        "a": 1.25, "b": 0.10, "c": 0.25   # Soal Sedang
+        "a": 0.25, "b": 0.30, "c": 0.25, "c": 0.25   # Soal Sedang
     },
     {
         "id": 5, 
         "teks": "Strategi paling efektif untuk mencapai target organisasi jangka panjang adalah...",
         "opsi": ["A. Inovasi berkelanjutan", "B. Mengurangi biaya", "C. Bekerja keras", "D. Menambah personil"],
         "kunci": "A",
-        "a": 2.10, "b": 1.45, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
+        "a": 0.60, "b": 0.10, "c": 0.15, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
     }
 ]
 # --- 3. FUNGSI PSIKOMETRI & DATA ---
@@ -126,4 +126,5 @@ else:
             
         st.metric("Estimasi Kemampuan (θ)", f"{st.session_state.theta:.3f}")
         st.write(f"Reliabilitas Marginal: **{rel:.3f}**")
+
 
