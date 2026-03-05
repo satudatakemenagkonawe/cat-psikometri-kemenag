@@ -68,13 +68,13 @@ def transform_ke_100(theta):
     theta_clipped = np.clip(theta, theta_min, theta_max)
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
-def kirim_ke_sheets(nama, nomor_peserta, theta, rel, sem, skor):
+def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     url_script = "https://script.google.com/macros/s/AKfycbzugHdf8FJymxPrj0ymluwUAqd-PomZ7WEf29lbsF-RSt5Z4yId3AFqS6wckqgWf-Y0Lg/exec" # Pastikan URL ini benar
     
-    # Payload harus sesuai dengan variabel yang dipanggil di Apps Script (data.nama, data.nomor_peserta, dll)
+    # Payload harus sesuai dengan variabel yang dipanggil di Apps Script (data.nama, data.nip, dll)
     payload = {
         "nama": nama,
-        "nomor_peserta": nomor_peserta,          # Ini akan masuk ke kolom Nomor_Peserta
+        "nip": nip,          # Ini akan masuk ke kolom nip
         "theta": round(theta, 4),
         "rel": round(rel, 4),
         "sem": round(sem, 4),
@@ -90,16 +90,16 @@ if not st.session_state.identitas_siap:
     st.title("🛡️ Tes CAT Online")
     with st.form("identitas"):
         nama_input = st.text_input("Nama Lengkap")
-        nomor_peserta_input = st.text_input("Nomor Peserta")
+        nip_input = st.text_input("nip")
         if st.form_submit_button("Mulai Tes"):
-            if nama_input and nomor_peserta_input:
+            if nama_input and nip_input:
                 st.session_state.nama = nama_input
-                st.session_state.nomor_peserta = nomor_peserta_input
+                st.session_state.nip = nip_input
                 st.session_state.identitas_siap = True
                 st.session_state.start_time = time.time()
                 st.rerun()
             else:
-                st.error("Mohon isi nama dan nomor_peserta.")
+                st.error("Mohon isi nama dan nip.")
 
 # --- 3. TAMPILAN ANTARMUKA UTAMA (Hanya tampil setelah login) ---
 else:
@@ -174,7 +174,7 @@ else:
     st.metric(label="SKOR AKHIR", value=f"{skor_final}")
     
     if 'sent' not in st.session_state:
-        kirim_ke_sheets(st.session_state.nama, st.session_state.nomor_peserta, st.session_state.theta, rel, sem, skor_final)
+        kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
         st.session_state.sent = True
     
     st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
