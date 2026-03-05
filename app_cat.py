@@ -7,21 +7,6 @@ import time
 # --- 1. INISIALISASI SESSION STATE ---
 if 'identitas_siap' not in st.session_state:
     st.session_state.identitas_siap = False
-# --- 2. HALAMAN IDENTITAS (Hanya tampil jika belum siap) ---
-if not st.session_state.identitas_siap:
-    st.title("🛡️ Tes CAT Online")
-    with st.form("identitas"):
-        nama_input = st.text_input("Nama Lengkap")
-        nip_input = st.text_input("NIP / Nomor Pegawai")
-        if st.form_submit_button("Mulai Tes"):
-            if nama_input and nip_input:
-                st.session_state.nama = nama_input
-                st.session_state.nip = nip_input
-                st.session_state.identitas_siap = True
-                st.session_state.start_time = time.time()
-                st.rerun()
-            else:
-                st.error("Mohon isi nama dan NIP.")
 if 'index_soal' not in st.session_state:
     st.session_state.index_soal = 0
 if 'theta' not in st.session_state:
@@ -101,6 +86,48 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
         return response.status_code == 500
     except:
         return False
+# --- 2. HALAMAN IDENTITAS (Hanya tampil jika belum siap) ---
+if not st.session_state.identitas_siap:
+    st.title("🛡️ Tes CAT Online")
+    with st.form("identitas"):
+        nama_input = st.text_input("Nama Lengkap")
+        nip_input = st.text_input("NIP / Nomor Pegawai")
+        if st.form_submit_button("Mulai Tes"):
+            if nama_input and nip_input:
+                st.session_state.nama = nama_input
+                st.session_state.nip = nip_input
+                st.session_state.identitas_siap = True
+                st.session_state.start_time = time.time()
+                st.rerun()
+            else:
+                st.error("Mohon isi nama dan NIP.")
+
+# --- 3. TAMPILAN ANTARMUKA UTAMA (Hanya tampil setelah login) ---
+else:
+    # Header sejajar: Judul di kiri, Nama & Timer di kanan
+    col_judul, col_info = st.columns([3, 1])
+    
+    elapsed_time = time.time() - st.session_state.start_time
+    remaining_time = max(0, 60 - int(elapsed_time))
+
+    with col_judul:
+        st.title("🛡️ Tes CAT Online")
+
+    with col_info:
+        # Menampilkan Nama yang sudah pasti ada di session_state
+        st.markdown(f"""
+            <div style="text-align: right; padding-top: 10px;">
+                <b>👤 {st.session_state.nama}</b><br>
+                <span style="color: {'red' if remaining_time < 10 else 'black'}; font-size: 20px; font-weight: bold;">
+                    ⏱️ {remaining_time} Detik
+                </span>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Masukkan logika pertanyaan (if index_soal < len...) di sini
+    # ...
 # 2. LOGIKA HALAMAN (Soal vs Hasil)
 if st.session_state.index_soal < len(bank_soal):
     # --- JIKA MASIH ADA SOAL ---
@@ -158,6 +185,7 @@ else:
         st.session_state.sent = True
     
     st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
+
 
 
 
