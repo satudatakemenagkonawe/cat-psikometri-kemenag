@@ -123,15 +123,10 @@ else:
                 </span>
             </div>
         """, unsafe_allow_html=True)
-
     st.markdown("---")
-
-    # Masukkan logika pertanyaan (if index_soal < len...) di sini
-    # ...
 # 2. LOGIKA HALAMAN (Soal vs Hasil)
 if st.session_state.index_soal < len(bank_soal):
     # --- JIKA MASIH ADA SOAL ---
-    
     # Logika Timer Otomatis
     if remaining_time <= 0:
         st.warning("Waktu habis! Berlanjut ke soal berikutnya...")
@@ -139,7 +134,6 @@ if st.session_state.index_soal < len(bank_soal):
         st.session_state.index_soal += 1
         st.session_state.start_time = time.time()
         st.rerun()
-
     # Pemilihan Soal Adaptive
     sisa = [s for s in bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
     soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
@@ -185,6 +179,7 @@ else:
         st.session_state.sent = True
     
     st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
+
 
 
 
