@@ -1,11 +1,58 @@
 import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
+import requests
 import pandas as pd
+import numpy as np
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="CAT Psikometri Pro", layout="wide")
+st.set_page_config(page_title="Computer Adaptive Tesrting", layout="wide")
 
+# --- FUNGSI KIRIM DATA (Google Apps Script) ---
+def kirim_ke_google_sheets(nama, nip, theta, rel, sem):
+    # Tempelkan URL Web App dari Apps Script Anda di sini
+    url_script = "https://script.google.com/macros/s/AKfycbyZ8d3-cZ4x7H9i6rl0f5D27WGTER2AVOWJ3OuDDgmpNhhxgQXTcDh1oe30fKfHnQwgAw/exec"
+    
+    payload = {
+        "nama": nama,
+        "nip": nip,
+        "theta": round(theta, 4),
+        "rel": round(rel, 4),
+        "sem": round(sem, 4)
+    }
+    
+    try:
+        response = requests.post(url_script, json=payload)
+        return response.status_code == 200
+    except:
+        return False
+
+# --- FORMULIR IDENTITAS ---
+if 'identitas_siap' not in st.session_state:
+    st.session_state.identitas_siap = False
+
+if not st.session_state.identitas_siap:
+    st.title("📝 Identitas Peserta Tes")
+    st.info("Silakan isi data diri Anda sebelum memulai TES.")
+    
+    with st.form("form_identitas"):
+        nama_input = st.text_input("Nama Lengkap")
+        nip_input = st.text_input("NIP / ID Pegawai")
+        
+        submit_identitas = st.form_submit_button("Mulai Tes")
+        
+        if submit_identitas:
+            if nama_input and nip_input:
+                st.session_state.nama = nama_input
+                st.session_state.nip = nip_input
+                st.session_state.identitas_siap = True
+                st.rerun()
+            else:
+                st.warning("Mohon isi Nama dan NIP terlebih dahulu.")
+else:
+    # --- LOGIKA TES ANDA (Yang sudah kita buat sebelumnya) ---
+    st.sidebar.title("👤 Profil Peserta")
+    st.sidebar.write(f"**Nama:** {st.session_state.nama}")
+    st.sidebar.write(f"**NIP:** {st.session_state.nip}")
+    
 # --- ENGINE PSIKOMETRI ---
 def hitung_prob_3pl(theta, a, b, c):
     return c + (1 - c) / (1 + np.exp(-a * (theta - b)))
@@ -140,3 +187,8 @@ def simpan_ke_sheets_gratis(nama, nip, theta, rel, sem):
     response = requests.post(url_script, json=payload)
     if response.status_code == 200:
         st.success("✅ Data berhasil terkirim ke Google Sheets Database CAT Kemenag!")
+
+# SAAT TES SELESAI, panggil fungsi ini:
+    # if selesai:
+    #     berhasil = kirim_ke_google_sheets(st.session_state.nama, st.session_state.nip, theta, rel, sem)
+    #     if berhasil: st.success("Data tersimpan di database.")
