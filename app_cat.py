@@ -123,9 +123,6 @@ else:
         elapsed_time = time.time() - st.session_state.start_time
         remaining_time = max(0, 60 - int(elapsed_time))
         
-        st.sidebar.write(f"👤 **{st.session_state.nama}**")
-        st.sidebar.subheader(f"⏱️ Waktu Sisa: {remaining_time} Detik")
-        
         if remaining_time <= 0:
             st.warning("Waktu habis! Berlanjut ke soal berikutnya...")
             time.sleep(1)
@@ -180,6 +177,7 @@ else:
             st.session_state.sent = True
         
         st.info("SELAMAT... Data detail hasil tes telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
 
