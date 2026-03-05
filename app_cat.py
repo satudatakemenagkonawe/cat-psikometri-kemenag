@@ -47,21 +47,7 @@ if 'bank_soal' not in st.session_state:
         "a": 2.10, "b": 1.45, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
     }
 ]
-# --- 1. HALAMAN IDENTITAS ---
-if not st.session_state.identitas_siap:
-    st.title("📝 Identitas Peserta Tes")
-    with st.form("form_awal"):
-        nama = st.text_input("Nama Peserta")
-        nip = st.text_input("Nomor Peserta")
-        if st.form_submit_button("Mulai Tes"):
-            if nama and nip:
-                st.session_state.nama = nama
-                st.session_state.nip = nip
-                st.session_state.identitas_siap = True
-                st.rerun()
-            else:
-                st.error("Mohon isi data diri terlebih dahulu.") 
-                
+
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Computer Adaptive Tesrting", layout="wide")
 
@@ -181,5 +167,6 @@ if st.session_state.index_soal == len(st.session_state.bank_soal):
             st.session_state.data_terkirim = True
             st.balloons()
             st.info("✅ Data Anda telah tercatat secara otomatis di database kantor.")
+
 
 
