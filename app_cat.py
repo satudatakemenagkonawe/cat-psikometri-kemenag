@@ -107,7 +107,7 @@ else:
                 info = hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
                 st.session_state.total_info += info
                 p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+                st.session_state.theta += (0.95 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
                 
                 st.session_state.soal_selesai.append(soal)
                 st.session_state.index_soal += 1
@@ -119,7 +119,7 @@ else:
         st.rerun()
     else:
         # HALAMAN HASIL
-        skor_final = transform_ke_500(st.session_state.theta)
+        skor_final = transform_ke_100(st.session_state.theta)
         rel = st.session_state.total_info / (st.session_state.total_info + 1)
         sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
         
@@ -131,3 +131,4 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
