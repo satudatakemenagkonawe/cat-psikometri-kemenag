@@ -25,7 +25,7 @@ bank_soal = [
         "teks": "Dalam situasi konflik antar bawahan, tindakan pertama Anda adalah...",
         "opsi": ["A. Membiarkan mereka", "B. Memanggil kedua belah pihak", "C. Melapor ke atasan", "D. Memberi sanksi"],
         "kunci": "B",
-        "a": 0.65, "b": 0.20, "c": 0.22, "D": 0.15  # Soal Mudah, Daya Beda Tinggi
+        "a": 0.15, "b": 0.45, "c": 0.15, "D": 0.25  # Soal Mudah, Daya Beda Tinggi
     },
     {
         "id": 2, 
@@ -46,7 +46,7 @@ bank_soal = [
         "teks": "Menghadapi rekan kerja yang berasal dari latar belakang budaya berbeda, Anda akan...",
         "opsi": ["A. Bersikap acuh", "B. Menghargai perbedaan", "C. Menghindari", "D. Meminta pindah divisi"],
         "kunci": "B",
-        "a": 0.25, "b": 0.30, "c": 0.25, "c": 0.25   # Soal Sedang
+        "a": 0.15, "b": 0.55, "c": 0.20, "c": 0.10   # Soal Sedang
     },
     {
         "id": 5, 
@@ -70,7 +70,7 @@ def transform_ke_100(theta):
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "URL_WEB_APP_APPS_SCRIPT_ANDA" # GANTI DENGAN URL ANDA
+    url_script = "https://script.google.com/macros/s/AKfycbw3200UW17UxYZNFEbAOxTT3uMjsdNNG_z2pJov9Z9skI586UlT_w6h_Pz8Sv4xOnmD/exec" # GANTI DENGAN URL ANDA
     payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
     try:
         requests.post(url_script, json=payload)
@@ -155,3 +155,4 @@ else:
             st.session_state.sent = True
         
         st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
+
