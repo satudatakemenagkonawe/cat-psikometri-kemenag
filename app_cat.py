@@ -103,16 +103,12 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
         return False
 
 # --- 3. TAMPILAN ANTARMUKA UTAMA (Hanya tampil setelah login) ---
-else:
-    # Header sejajar: Judul di kiri, Nama & Timer di kanan
+# Header sejajar: Judul di kiri, Nama & Timer di kanan
     col_judul, col_info = st.columns([3, 1])
-    
     elapsed_time = time.time() - st.session_state.start_time
     remaining_time = max(0, 60 - int(elapsed_time))
-
     with col_judul:
         st.title("🛡️ Tes CAT Online")
-
     with col_info:
         # Menampilkan Nama yang sudah pasti ada di session_state
         st.markdown(f"""
@@ -182,4 +178,5 @@ else:
         st.session_state.sent = True
     
     st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
+
 
