@@ -88,13 +88,13 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     except:
         return False
 # --- 4. TAMPILAN ANTARMUKA ---
-st.title("🛡️ Computer Adaptive Testing")
+st.title("🛡️ TES ONLINE - CAT")
 
 if not st.session_state.identitas_siap:
     with st.form("identitas"):
         st.subheader("Data Diri Peserta")
         nama = st.text_input("Nama Lengkap")
-        nip = st.text_input("NIP / Nomor Pegawai")
+        nip = st.text_input("Nomor Peserta")
         if st.form_submit_button("Mulai Tes"):
             if nama and nip:
                 st.session_state.nama, st.session_state.nip = nama, nip
@@ -164,5 +164,6 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
             st.session_state.sent = True
         
-        st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
+        st.info("SELAMAT... Data detail hasil tes telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
