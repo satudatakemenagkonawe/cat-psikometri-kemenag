@@ -61,11 +61,11 @@ if not st.session_state.identitas_siap:
 else:
     # HEADER KANAN ATAS
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 10 - int(elapsed))
+    rem = max(0, 20 - int(elapsed))
     
     c1, c2 = st.columns([3, 1])
     c1.title("🛡️ Tes CAT Online")
-    c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:20px; color:{'red' if rem < 10 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:10px; color:{'red' if rem < 20 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
     st.markdown("---")
 
     if st.session_state.index_soal < len(st.session_state.bank_soal):
@@ -107,3 +107,4 @@ else:
         st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
         st.balloons()
         st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+
