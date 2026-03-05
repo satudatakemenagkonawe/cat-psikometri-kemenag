@@ -9,7 +9,7 @@ st.set_page_config(page_title="Computer Adaptive Tesrting", layout="wide")
 # --- FUNGSI KIRIM DATA (Google Apps Script) ---
 def kirim_ke_google_sheets(nama, nip, theta, rel, sem):
     # Tempelkan URL Web App dari Apps Script Anda di sini
-    url_script = "https://script.google.com/macros/s/AKfycbyZ8d3-cZ4x7H9i6rl0f5D27WGTER2AVOWJ3OuDDgmpNhhxgQXTcDh1oe30fKfHnQwgAw/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbxlRD_XuP4qB5nl-BCbX6nHq3iGPBZ_xV8kxYC4-iFnMn3IrZtqYc3kp-3PO6Kt4tLFZA/exec"
     
     payload = {
         "nama": nama,
@@ -192,3 +192,4 @@ def simpan_ke_sheets_gratis(nama, nip, theta, rel, sem):
     # if selesai:
     #     berhasil = kirim_ke_google_sheets(st.session_state.nama, st.session_state.nip, theta, rel, sem)
     #     if berhasil: st.success("Data tersimpan di database.")
+
