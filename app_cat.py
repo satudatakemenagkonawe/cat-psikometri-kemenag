@@ -70,7 +70,7 @@ def transform_ke_100(theta):
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "https://script.google.com/macros/s/AKfycbw3200UW17UxYZNFEbAOxTT3uMjsdNNG_z2pJov9Z9skI586UlT_w6h_Pz8Sv4xOnmD/exec" # GANTI DENGAN URL ANDA
+    url_script = "https://script.google.com/macros/s/AKfycbwbwtPadOo5r89lr3V-vudR39fitZKy3Od1UGQga1BCbEeavrhTk3YZ6sJMwXSWY3aZ8w/exec" # GANTI DENGAN URL ANDA
     payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
     try:
         requests.post(url_script, json=payload)
@@ -155,4 +155,5 @@ else:
             st.session_state.sent = True
         
         st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
+
 
