@@ -117,6 +117,21 @@ if st.session_state.index_soal < len(bank_soal):
     if remaining_time <= 0:
         st.warning("Waktu habis!")
         # ... (logika pindah soal otomatis Anda) ...
+else:
+    if st.session_state.index_soal < len(bank_soal):
+        # LOGIKA TIMER 60 DETIK
+        elapsed_time = time.time() - st.session_state.start_time
+        remaining_time = max(0, 60 - int(elapsed_time))
+        
+        st.sidebar.write(f"👤 **{st.session_state.nama}**")
+        st.sidebar.subheader(f"⏱️ Waktu Sisa: {remaining_time} Detik")
+        
+        if remaining_time <= 0:
+            st.warning("Waktu habis! Berlanjut ke soal berikutnya...")
+            time.sleep(1)
+            st.session_state.index_soal += 1
+            st.session_state.start_time = time.time()
+            st.rerun()
 
         # Pemilihan Soal Adaptive
         sisa = [s for s in bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
@@ -165,6 +180,7 @@ if st.session_state.index_soal < len(bank_soal):
             st.session_state.sent = True
         
         st.info("SELAMAT... Data detail hasil tes telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
 
