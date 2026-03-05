@@ -124,4 +124,19 @@ if st.session_state.index_soal > 0:
     ax[1].axvline(st.session_state.theta, color='red', linestyle='--')
     ax[1].set_title("Kurva Karakteristik Item (ICC)")
     
+
     st.pyplot(fig)
+    import requests
+
+def simpan_ke_sheets_gratis(nama, nip, theta, rel, sem):
+    url_script = "URL_WEB_APP_ANDA"
+    payload = {
+        "nama": nama,
+        "nip": nip,
+        "theta": theta,
+        "rel": rel,
+        "sem": sem
+    }
+    response = requests.post(url_script, json=payload)
+    if response.status_code == 200:
+        st.success("✅ Data berhasil terkirim ke Google Sheets Database CAT Kemenag!")
