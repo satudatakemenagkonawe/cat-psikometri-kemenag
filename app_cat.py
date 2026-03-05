@@ -101,26 +101,6 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
         return response.status_code == 500
     except:
         return False
-
-# --- 3. TAMPILAN ANTARMUKA UTAMA (Hanya tampil setelah login) ---
-# Header sejajar: Judul di kiri, Nama & Timer di kanan
-    col_judul, col_info = st.columns([3, 1])
-    elapsed_time = time.time() - st.session_state.start_time
-    remaining_time = max(0, 60 - int(elapsed_time))
-    with col_judul:
-        st.title("🛡️ Tes CAT Online")
-    with col_info:
-        # Menampilkan Nama yang sudah pasti ada di session_state
-        st.markdown(f"""
-            <div style="text-align: right; padding-top: 10px;">
-                <b>👤 {st.session_state.nama}</b><br>
-                <span style="color: {'red' if remaining_time < 10 else 'black'}; font-size: 20px; font-weight: bold;">
-                    ⏱️ {remaining_time} Detik
-                </span>
-            </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("---")
 # 2. LOGIKA HALAMAN (Soal vs Hasil)
 if st.session_state.index_soal < len(bank_soal):
     # --- JIKA MASIH ADA SOAL ---
@@ -178,5 +158,6 @@ else:
         st.session_state.sent = True
     
     st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
+
 
 
