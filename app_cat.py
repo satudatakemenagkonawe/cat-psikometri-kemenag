@@ -89,17 +89,17 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
         return False
 
 # --- TAMPILAN ANTARMUKA ---
-# Membuat header dengan 2 kolom: satu untuk judul, satu untuk info peserta
+# 1. HEADER (Muncul terus selama tes maupun hasil akhir)
 col_judul, col_info = st.columns([3, 1])
+
+# Hitung waktu sisa (untuk digunakan di header dan logika soal)
+elapsed_time = time.time() - st.session_state.start_time
+remaining_time = max(0, 60 - int(elapsed_time))
 
 with col_judul:
     st.title("🛡️ Tes CAT Online")
 
 with col_info:
-    # Menghitung waktu di sini agar sinkron
-    elapsed_time = time.time() - st.session_state.start_time
-    remaining_time = max(0, 60 - int(elapsed_time))
-    
     # Menampilkan Nama dan Timer di pojok kanan atas
     st.markdown(f"""
         <div style="text-align: right; padding-top: 10px;">
@@ -112,71 +112,63 @@ with col_info:
 
 st.markdown("---") # Garis pemisah header
 
+# 2. LOGIKA HALAMAN (Soal vs Hasil)
 if st.session_state.index_soal < len(bank_soal):
-    # Logika Timer Otomatis (Tetap sama)
+    # --- JIKA MASIH ADA SOAL ---
+    
+    # Logika Timer Otomatis
     if remaining_time <= 0:
-        st.warning("Waktu habis!")
-        # ... (logika pindah soal otomatis Anda) ...
-else:
-    if st.session_state.index_soal < len(bank_soal):
-        # LOGIKA TIMER 60 DETIK
-        elapsed_time = time.time() - st.session_state.start_time
-        remaining_time = max(0, 60 - int(elapsed_time))
-        
-        if remaining_time <= 0:
-            st.warning("Waktu habis! Berlanjut ke soal berikutnya...")
-            time.sleep(1)
-            st.session_state.index_soal += 1
-            st.session_state.start_time = time.time()
-            st.rerun()
-
-        # Pemilihan Soal Adaptive
-        sisa = [s for s in bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
-        soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
-        
-        st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
-        st.info(soal['teks'])
-        pilihan = st.radio("Pilih jawaban Anda:", soal['opsi'], index=None)
-        
-        if st.button("Simpan & Lanjutkan"):
-            if pilihan:
-                skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
-                # Update IRT
-                info = hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                st.session_state.total_info += info
-                p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
-                
-                st.session_state.soal_selesai.append(soal)
-                st.session_state.index_soal += 1
-                st.session_state.start_time = time.time() # Reset waktu untuk soal berikutnya
-                st.rerun()
-            else:
-                st.warning("Silakan pilih jawaban sebelum melanjutkan.")
-        
-        # Refresh halaman setiap 1 detik untuk update timer
+        st.warning("Waktu habis! Berlanjut ke soal berikutnya...")
         time.sleep(1)
+        st.session_state.index_soal += 1
+        st.session_state.start_time = time.time()
         st.rerun()
 
-    else:
-        # --- HALAMAN HASIL AKHIR ---
-        skor_final = transform_ke_100(st.session_state.theta)
-        rel = st.session_state.total_info / (st.session_state.total_info + 1)
-        sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
-        
-        st.balloons()
-        st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
-        
-        # HANYA TAMPILKAN SKOR 0-100
-        st.markdown("### Hasil Evaluasi Anda:")
-        st.metric(label="SKOR AKHIR", value=f"{skor_final}")
-        
-        # Kirim semua data (termasuk theta & rel) ke Sheets secara diam-diam
-        if 'sent' not in st.session_state:
-            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
-            st.session_state.sent = True
-        
-        st.info("SELAMAT... Data detail hasil tes telah dikirimkan ke PUSAT DATA PENILAIAN.")
+    # Pemilihan Soal Adaptive
+    sisa = [s for s in bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
+    soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
+    
+    st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
+    st.info(soal['teks'])
+    pilihan = st.radio("Pilih jawaban Anda:", soal['opsi'], index=None)
+    
+    if st.button("Simpan & Lanjutkan"):
+        if pilihan:
+            skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
+            # Update IRT
+            info = hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+            st.session_state.total_info += info
+            p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+            st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+            
+            st.session_state.soal_selesai.append(soal)
+            st.session_state.index_soal += 1
+            st.session_state.start_time = time.time() 
+            st.rerun()
+        else:
+            st.warning("Silakan pilih jawaban sebelum melanjutkan.")
+    
+    # Update timer setiap detik
+    time.sleep(1)
+    st.rerun()
+
+else:
+    # --- JIKA TES SUDAH SELESAI ---
+    skor_final = transform_ke_100(st.session_state.theta)
+    rel = st.session_state.total_info / (st.session_state.total_info + 1)
+    sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+    
+    st.balloons()
+    st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
+    
+    st.markdown("### Hasil Evaluasi Anda:")
+    st.metric(label="SKOR AKHIR", value=f"{skor_final}")
+    
+    if 'sent' not in st.session_state:
+        kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
+        st.session_state.sent = True
+    
+    st.info("SELAMAT... Data detail hasil tes telah dikirimkan ke PUSAT DATA PENILAIAN.")
 
 
 
