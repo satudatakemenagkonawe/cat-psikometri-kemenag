@@ -42,7 +42,7 @@ def transform_ke_100(theta):
 @st.cache_data(ttl=60) # Data akan diperbarui setiap 1 menit
 def ambil_bank_soal():
     url_script = "https://script.google.com/macros/s/AKfycbzBIfWRSyKF4xzPgoAhlgT5_2GMs-VRBo7QtuzIj3_Mgs7tnLTCZRo0ymt9iIwpS6E_mg/exec"
-response = requests.get(url_script)
+    response = requests.get(url_script)
     return response.json()
 
 # Di bagian inisialisasi soal:
@@ -131,4 +131,5 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
