@@ -83,8 +83,6 @@ if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
     data_soal = ambil_bank_soal()
     if data_soal:
         st.session_state.bank_soal = data_soal
-    else:
-        st.error("Gagal memuat Bank Soal. Periksa koneksi atau URL Apps Script.")
 
 # --- 4. LOGIKA HALAMAN ---
 if not st.session_state.identitas_siap:
@@ -169,6 +167,7 @@ else:
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
         
+
 
 
 
