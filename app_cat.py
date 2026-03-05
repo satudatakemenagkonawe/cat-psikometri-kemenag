@@ -18,41 +18,11 @@ if 'total_info' not in st.session_state:
     
 # --- 2. KONFIGURASI BANK SOAL ---
 bank_soal = [
-    {
-        "id": 1, 
-        "teks": "Dalam situasi konflik antar bawahan, tindakan pertama Anda adalah...",
-        "opsi": ["A. Membiarkan mereka", "B. Memanggil kedua belah pihak", "C. Melapor ke atasan", "D. Memberi sanksi"],
-        "kunci": "B",
-        "a": 0.15, "b": 0.45, "c": 0.15, "D": 0.25  # Soal Mudah, Daya Beda Tinggi
-    },
-    {
-        "id": 2, 
-        "teks": "Bagaimana cara Anda menyikapi perubahan mendadak dalam prosedur kerja?",
-        "opsi": ["A. Menolak", "B. Mengikuti saja", "C. Mempelajari dan beradaptasi", "D. Mengeluh"],
-        "kunci": "C",
-        "a": 0.20, "b": 0.30, "c": 0.40, "D": 0.10  # Soal Menengah-Mudah
-    },
-    {
-        "id": 3, 
-        "teks": "Prioritas utama dalam memberikan pelayanan publik menurut Anda adalah...",
-        "opsi": ["A. Kecepatan", "B. Kepuasan pelanggan", "C. Prosedur formal", "D. Kenyamanan petugas"],
-        "kunci": "B",
-        "a": 0.20, "b": 0.50, "c": 0.10, "c": 0.10   # Soal Menengah-Sulit, Sangat Diskriminatif
-    },
-    {
-        "id": 4, 
-        "teks": "Menghadapi rekan kerja yang berasal dari latar belakang budaya berbeda, Anda akan...",
-        "opsi": ["A. Bersikap acuh", "B. Menghargai perbedaan", "C. Menghindari", "D. Meminta pindah divisi"],
-        "kunci": "B",
-        "a": 0.15, "b": 0.55, "c": 0.20, "c": 0.10   # Soal Sedang
-    },
-    {
-        "id": 5, 
-        "teks": "Strategi paling efektif untuk mencapai target organisasi jangka panjang adalah...",
-        "opsi": ["A. Inovasi berkelanjutan", "B. Mengurangi biaya", "C. Bekerja keras", "D. Menambah personil"],
-        "kunci": "A",
-        "a": 0.60, "b": 0.10, "c": 0.15, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
-    }
+    {"id": 1, "teks": "Dalam situasi konflik antar bawahan...", "opsi": ["A", "B", "C", "D"], "kunci": "B", "a": 1.65, "b": -1.20, "c": 0.22},
+    {"id": 2, "teks": "Menyikapi perubahan mendadak...", "opsi": ["A", "B", "C", "D"], "kunci": "C", "a": 1.40, "b": -0.40, "c": 0.20},
+    {"id": 3, "teks": "Prioritas pelayanan publik...", "opsi": ["A", "B", "C", "D"], "kunci": "B", "a": 1.90, "b": 0.60, "c": 0.18},
+    {"id": 4, "teks": "Rekan kerja beda budaya...", "opsi": ["A", "B", "C", "D"], "kunci": "B", "a": 1.25, "b": 0.10, "c": 0.25},
+    {"id": 5, "teks": "Strategi target organisasi...", "opsi": ["A", "B", "C", "D"], "kunci": "A", "a": 2.10, "b": 1.45, "c": 0.15}
 ]
 
 # --- 3. FUNGSI PENDUKUNG ---
@@ -167,6 +137,7 @@ else:
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
         
+
 
 
 
