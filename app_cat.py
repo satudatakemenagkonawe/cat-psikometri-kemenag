@@ -65,7 +65,7 @@ def hitung_iif(theta, a, b, c):
     return (a**2) * ((1-p)/p) * ((p - c) / (1 - c))**2
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem):
-    url_script = "URL_WEB_APP_APPS_SCRIPT_ANDA" # Ganti dengan URL hasil Deploy
+    url_script = "https://script.google.com/macros/s/AKfycbw3200UW17UxYZNFEbAOxTT3uMjsdNNG_z2pJov9Z9skI586UlT_w6h_Pz8Sv4xOnmD/exec" # Ganti dengan URL hasil Deploy
     payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem}
     try:
         requests.post(url_script, json=payload)
@@ -126,3 +126,4 @@ else:
             
         st.metric("Estimasi Kemampuan (θ)", f"{st.session_state.theta:.3f}")
         st.write(f"Reliabilitas Marginal: **{rel:.3f}**")
+
