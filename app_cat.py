@@ -7,13 +7,13 @@ import numpy as np
 st.set_page_config(page_title="Computer Adaptive Tesrting", layout="wide")
 
 # --- FUNGSI KIRIM DATA (Google Apps Script) ---
-def kirim_ke_google_sheets(nama, nip, theta, rel, sem):
+def kirim_ke_google_sheets(nama, no_peserta, theta, rel, sem):
     # Tempelkan URL Web App dari Apps Script Anda di sini
     url_script = "https://script.google.com/macros/s/AKfycbxlRD_XuP4qB5nl-BCbX6nHq3iGPBZ_xV8kxYC4-iFnMn3IrZtqYc3kp-3PO6Kt4tLFZA/exec"
     
     payload = {
         "nama": nama,
-        "nip": nip,
+        "no_peserta": no_peserta,
         "theta": round(theta, 4),
         "rel": round(rel, 4),
         "sem": round(sem, 4)
@@ -35,23 +35,23 @@ if not st.session_state.identitas_siap:
     
     with st.form("form_identitas"):
         nama_input = st.text_input("Nama Lengkap")
-        nip_input = st.text_input("NIP / ID Pegawai")
+        no_peserta_input = st.text_input("Nomor peserta")
         
         submit_identitas = st.form_submit_button("Mulai Tes")
         
         if submit_identitas:
-            if nama_input and nip_input:
+            if nama_input and no_peserta_input:
                 st.session_state.nama = nama_input
-                st.session_state.nip = nip_input
+                st.session_state.nip = no_peserta_input
                 st.session_state.identitas_siap = True
                 st.rerun()
             else:
-                st.warning("Mohon isi Nama dan NIP terlebih dahulu.")
+                st.warning("Mohon isi Nama dan NOMOR PESERTA terlebih dahulu.")
 else:
     # --- LOGIKA TES ANDA (Yang sudah kita buat sebelumnya) ---
     st.sidebar.title("👤 Profil Peserta")
-    st.sidebar.write(f"**Nama:** {st.session_state.nama}")
-    st.sidebar.write(f"**NIP:** {st.session_state.nip}")
+    st.sidebar.write(f"**Nama Peserta:** {st.session_state.nama}")
+    st.sidebar.write(f"**Nomor Peserta:** {st.session_state.nip}")
     
 # --- ENGINE PSIKOMETRI ---
 def hitung_prob_3pl(theta, a, b, c):
@@ -103,7 +103,7 @@ if 'theta' not in st.session_state:
     st.session_state.total_info = 0
 
 # --- UI APP ---
-st.title("🚀 Prototipe Aplikasi CAT Psikometri")
+st.title("Aplikasi CAT Psikometri")
 st.markdown("---")
 
 col1, col2 = st.columns([2, 1])
@@ -192,4 +192,5 @@ def simpan_ke_sheets_gratis(nama, nip, theta, rel, sem):
     # if selesai:
     #     berhasil = kirim_ke_google_sheets(st.session_state.nama, st.session_state.nip, theta, rel, sem)
     #     if berhasil: st.success("Data tersimpan di database.")
+
 
