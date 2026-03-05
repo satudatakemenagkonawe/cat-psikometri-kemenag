@@ -70,7 +70,7 @@ def transform_ke_100(theta):
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "https://docs.google.com/spreadsheets/d/1dCPVMAk7GZ9OrozXsu9T5WlujsoI6VaDsa7NrmBB3MU/edit?usp=sharing" # Pastikan URL ini benar
+    url_script = "https://script.google.com/macros/s/AKfycbzugHdf8FJymxPrj0ymluwUAqd-PomZ7WEf29lbsF-RSt5Z4yId3AFqS6wckqgWf-Y0Lg/exec" # Pastikan URL ini benar
     
     # Payload harus sesuai dengan variabel yang dipanggil di Apps Script (data.nama, data.nip, dll)
     payload = {
@@ -165,6 +165,7 @@ else:
             st.session_state.sent = True
         
         st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
+
 
 
 
