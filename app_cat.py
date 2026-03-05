@@ -126,7 +126,20 @@ else:
             st.session_state.index_soal += 1
             st.rerun()
     else:
-# --- DI HALAMAN SELESAI ---
+        # --- HALAMAN SELESAI ---
+        st.success("Tes Selesai! Skor Anda sedang diproses...")
+        rel = st.session_state.total_info / (st.session_state.total_info + 1)
+        sem = 1 / np.sqrt(st.session_state.total_info)
+        
+        if 'sent' not in st.session_state:
+            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem)
+            st.session_state.sent = True
+            st.balloons()
+            
+        st.metric("Estimasi Kemampuan (θ)", f"{st.session_state.theta:.3f}")
+        st.write(f"Reliabilitas Marginal: **{rel:.3f}**")
+
+        # --- DI HALAMAN SELESAI ---
 skor_akhir = transform_ke_100(st.session_state.theta)
 st.metric("Skor Akhir (0-100)", f"{skor_akhir}")
 
