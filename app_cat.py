@@ -9,7 +9,7 @@ st.set_page_config(page_title="Computer Adaptive Tesrting", layout="wide")
 # --- FUNGSI KIRIM DATA (Google Apps Script) ---
 def kirim_ke_google_sheets(nama, no_peserta, theta, rel, sem):
     # Tempelkan URL Web App dari Apps Script Anda di sini
-    url_script = "https://script.google.com/macros/s/AKfycbxlRD_XuP4qB5nl-BCbX6nHq3iGPBZ_xV8kxYC4-iFnMn3IrZtqYc3kp-3PO6Kt4tLFZA/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbw3200UW17UxYZNFEbAOxTT3uMjsdNNG_z2pJov9Z9skI586UlT_w6h_Pz8Sv4xOnmD/exec"
     
     payload = {
         "nama": nama,
@@ -92,105 +92,32 @@ if 'bank_soal' not in st.session_state:
         "kunci": "B",
         "a": 1.25, "b": 0.10, "c": 0.25   # Soal Sedang
     },
-    ]
-
-# --- STATE MANAGEMENT ---
-if 'theta' not in st.session_state:
-    st.session_state.theta = 0.0
-    st.session_state.riwayat_theta = [0.0]
-    st.session_state.soal_selesai = []
-    st.session_state.index_soal = 0
-    st.session_state.total_info = 0
-
-# --- UI APP ---
-st.title("Aplikasi CAT Psikometri")
-st.markdown("---")
-
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    if st.session_state.index_soal < len(st.session_state.bank_soal):
-        # Item Selection (Adaptive)
-        sisa_soal = [s for s in st.session_state.bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
-        soal_aktif = min(sisa_soal, key=lambda x: abs(x['b'] - st.session_state.theta))
-        
-        st.subheader(f"Pertanyaan ke-{st.session_state.index_soal + 1}")
-        st.info(soal_aktif['teks'])
-        
-        pilihan = st.radio("Pilih Jawaban Anda:", soal_aktif['opsi'], key=f"soal_{soal_aktif['id']}")
-        
-        if st.button("Kirim Jawaban"):
-            # Scoring
-            skor = 1 if pilihan.startswith(soal_aktif['kunci']) else 0
-            
-            # Update Psikometri
-            info_b = hitung_iif(st.session_state.theta, soal_aktif['a'], soal_aktif['b'], soal_aktif['c'])
-            st.session_state.total_info += info_b
-            
-            p = hitung_prob_3pl(st.session_state.theta, soal_aktif['a'], soal_aktif['b'], soal_aktif['c'])
-            st.session_state.theta += (0.85 * soal_aktif['a'] * ((skor - p) / (1 - soal_aktif['c'])))
-            
-            st.session_state.riwayat_theta.append(st.session_state.theta)
-            st.session_state.soal_selesai.append(soal_aktif)
-            st.session_state.index_soal += 1
-            st.rerun()
-    else:
-        st.success("✅ Tes Selesai! Silakan lihat hasil analisis di samping.")
-        if st.button("Ulangi Tes"):
-            for key in st.session_state.keys(): del st.session_state[key]
-            st.rerun()
-
-with col2:
-    st.subheader("Statistik Real-time")
-    st.metric("Estimasi Kemampuan (θ)", f"{st.session_state.theta:.3f}")
-    
-    if st.session_state.total_info > 0:
-        rel = st.session_state.total_info / (st.session_state.total_info + 1)
-        sem = 1 / np.sqrt(st.session_state.total_info)
-        st.write(f"**Reliabilitas Marginal:** {rel:.3f}")
-        st.write(f"**SEM:** {sem:.3f}")
-
-# --- GRAFIK ANALISIS ---
-if st.session_state.index_soal > 0:
-    st.markdown("---")
-    st.subheader("Analisis Visual Performa")
-    
-    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
-    
-    # Trajektori
-    ax[0].plot(st.session_state.riwayat_theta, marker='o', color='teal')
-    ax[0].set_title("Pergerakan Kemampuan (Theta)")
-    ax[0].set_ylim(-4, 4)
-    ax[0].grid(True, alpha=0.3)
-    
-    # ICC
-    t_range = np.linspace(-4, 4, 100)
-    for s in st.session_state.soal_selesai:
-        p_range = hitung_prob_3pl(t_range, s['a'], s['b'], s['c'])
-        ax[1].plot(t_range, p_range, alpha=0.5, label=f"b={s['b']}")
-    ax[1].axvline(st.session_state.theta, color='red', linestyle='--')
-    ax[1].set_title("Kurva Karakteristik Item (ICC)")
-    
-
-    st.pyplot(fig)
-    import requests
-
-def simpan_ke_sheets_gratis(nama, nip, theta, rel, sem):
-    url_script = "URL_WEB_APP_ANDA"
-    payload = {
-        "nama": nama,
-        "nip": nip,
-        "theta": theta,
-        "rel": rel,
-        "sem": sem
+    {
+        "id": 5, 
+        "teks": "Strategi paling efektif untuk mencapai target organisasi jangka panjang adalah...",
+        "opsi": ["A. Inovasi berkelanjutan", "B. Mengurangi biaya", "C. Bekerja keras", "D. Menambah personil"],
+        "kunci": "A",
+        "a": 2.10, "b": 1.45, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
     }
-    response = requests.post(url_script, json=payload)
-    if response.status_code == 200:
-        st.success("✅ Data berhasil terkirim ke Google Sheets Database CAT Kemenag!")
-
-# SAAT TES SELESAI, panggil fungsi ini:
-    # if selesai:
-    #     berhasil = kirim_ke_google_sheets(st.session_state.nama, st.session_state.nip, theta, rel, sem)
-    #     if berhasil: st.success("Data tersimpan di database.")
-
-
+]
+# Tambahkan ini di bagian akhir tes setelah soal ke-5 dijawab
+if st.session_state.index_soal == len(st.session_state.bank_soal):
+    st.success(f"Tes Selesai, {st.session_state.nama}!")
+    
+    # Menghitung statistik akhir
+    rel = st.session_state.total_info / (st.session_state.total_info + 1)
+    sem = 1 / np.sqrt(st.session_state.total_info)
+    
+    # Kirim data otomatis sekali saja
+    if 'data_terkirim' not in st.session_state:
+        berhasil = kirim_ke_google_sheets(
+            st.session_state.nama, 
+            st.session_state.nip, 
+            st.session_state.theta, 
+            rel, 
+            sem
+        )
+        if berhasil:
+            st.session_state.data_terkirim = True
+            st.balloons()
+            st.info("✅ Data Anda telah tercatat secara otomatis di database kantor.")
