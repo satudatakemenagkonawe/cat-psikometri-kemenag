@@ -67,7 +67,7 @@ def hitung_iif(theta, a, b, c):
 def transform_ke_100(theta):
     theta_min, theta_max = -3.0, 3.0
     theta_clipped = np.clip(theta, theta_min, theta_max)
-    return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
+    return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 300, 2)
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     url_script = "https://script.google.com/macros/s/AKfycbzugHdf8FJymxPrj0ymluwUAqd-PomZ7WEf29lbsF-RSt5Z4yId3AFqS6wckqgWf-Y0Lg/exec" # Pastikan URL ini benar
@@ -79,7 +79,7 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
         "theta": round(theta, 4),
         "rel": round(rel, 4),
         "sem": round(sem, 4),
-        "skor_akhir": skor   # Ini mengirim nilai 0-100
+        "skor_akhir": skor   # Ini mengirim nilai 0-300
     }
     
     try:
@@ -88,7 +88,7 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     except:
         return False
 # --- 4. TAMPILAN ANTARMUKA ---
-st.title("🛡️ CAT Kemenag Konawe")
+st.title("🛡️ Computer Adaptive Testing")
 
 if not st.session_state.identitas_siap:
     with st.form("identitas"):
@@ -165,7 +165,3 @@ else:
             st.session_state.sent = True
         
         st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
-
-
-
-
