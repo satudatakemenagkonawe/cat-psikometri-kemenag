@@ -67,7 +67,7 @@ def hitung_iif(theta, a, b, c):
 def transform_ke_100(theta):
     theta_min, theta_max = -3.0, 3.0
     theta_clipped = np.clip(theta, theta_min, theta_max)
-    return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 300, 2)
+    return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 500, 2)
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     url_script = "https://script.google.com/macros/s/AKfycbzugHdf8FJymxPrj0ymluwUAqd-PomZ7WEf29lbsF-RSt5Z4yId3AFqS6wckqgWf-Y0Lg/exec" # Pastikan URL ini benar
@@ -84,7 +84,7 @@ def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
     
     try:
         response = requests.post(url_script, json=payload)
-        return response.status_code == 200
+        return response.status_code == 500
     except:
         return False
 # --- 4. TAMPILAN ANTARMUKA ---
@@ -165,3 +165,4 @@ else:
             st.session_state.sent = True
         
         st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
+
