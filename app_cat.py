@@ -70,13 +70,23 @@ def transform_ke_100(theta):
     return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "https://script.google.com/macros/s/AKfycbwbwtPadOo5r89lr3V-vudR39fitZKy3Od1UGQga1BCbEeavrhTk3YZ6sJMwXSWY3aZ8w/exec" # GANTI DENGAN URL ANDA
-    payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
+    url_script = "https://docs.google.com/spreadsheets/d/1dCPVMAk7GZ9OrozXsu9T5WlujsoI6VaDsa7NrmBB3MU/edit?usp=sharing" # Pastikan URL ini benar
+    
+    # Payload harus sesuai dengan variabel yang dipanggil di Apps Script (data.nama, data.nip, dll)
+    payload = {
+        "nama": nama,
+        "nip": nip,          # Ini akan masuk ke kolom Nomor_Peserta
+        "theta": round(theta, 4),
+        "rel": round(rel, 4),
+        "sem": round(sem, 4),
+        "skor_akhir": skor   # Ini mengirim nilai 0-100
+    }
+    
     try:
-        requests.post(url_script, json=payload)
-        return True
-    except: return False
-
+        response = requests.post(url_script, json=payload)
+        return response.status_code == 200
+    except:
+        return False
 # --- 4. TAMPILAN ANTARMUKA ---
 st.title("🛡️ CAT Kemenag Konawe")
 
@@ -155,5 +165,6 @@ else:
             st.session_state.sent = True
         
         st.info("Data detail hasil tes telah dikirimkan ke database kantor Kemenag Konawe.")
+
 
 
