@@ -36,7 +36,7 @@ def hitung_iif(theta, a, b, c):
 def transform_ke_100(theta):
     theta_min, theta_max = -3.0, 3.0
     theta_clipped = np.clip(theta, theta_min, theta_max)
-    return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 100, 2)
+    return round(((theta_clipped - theta_min) / (theta_max - theta_min)) * 500, 2)
 
 # --- FUNGSI AMBIL SOAL DARI GOOGLE SHEETS ---
 @st.cache_data(ttl=60) # Data akan diperbarui setiap 1 menit
@@ -54,20 +54,20 @@ if not st.session_state.identitas_siap:
     # HALAMAN LOGIN
     st.title("🛡️ Tes CAT Online")
     with st.form("identitas"):
-        st.subheader("Data Diri Peserta")
+        st.subheader("Data Peserta")
         nama = st.text_input("Nama Lengkap")
-        nip = st.text_input("NIP / Nomor Pegawai")
+        nip = st.text_input("Nomor Peserta")
         if st.form_submit_button("Mulai Tes"):
             if nama and nip:
                 st.session_state.nama, st.session_state.nip = nama, nip
                 st.session_state.identitas_siap = True
                 st.session_state.start_time = time.time()
                 st.rerun()
-            else: st.error("Mohon lengkapi data diri.")
+            else: st.error("Mohon lengkapi data diri Anda.")
 else:
     # --- HEADER DINAMIS ---
     elapsed_time = time.time() - st.session_state.start_time
-    remaining_time = max(0, 60 - int(elapsed_time))
+    remaining_time = max(0, 10 - int(elapsed_time))
     
     col_judul, col_info = st.columns([3, 1])
     with col_judul:
@@ -119,7 +119,7 @@ else:
         st.rerun()
     else:
         # HALAMAN HASIL
-        skor_final = transform_ke_100(st.session_state.theta)
+        skor_final = transform_ke_500(st.session_state.theta)
         rel = st.session_state.total_info / (st.session_state.total_info + 1)
         sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
         
@@ -131,5 +131,3 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_final)
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
-
-
