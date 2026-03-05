@@ -53,6 +53,41 @@ bank_soal = [
         "kunci": "A",
         "a": 0.60, "b": 0.10, "c": 0.15, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
     }
+    {
+        "id": 1, 
+        "teks": "Dalam situasi konflik antar bawahan, tindakan pertama Anda adalah...",
+        "opsi": ["A. Membiarkan mereka", "B. Memanggil kedua belah pihak", "C. Melapor ke atasan", "D. Memberi sanksi"],
+        "kunci": "B",
+        "a": 0.15, "b": 0.45, "c": 0.15, "D": 0.25  # Soal Mudah, Daya Beda Tinggi
+    },
+    {
+        "id": 2, 
+        "teks": "Bagaimana cara Anda menyikapi perubahan mendadak dalam prosedur kerja?",
+        "opsi": ["A. Menolak", "B. Mengikuti saja", "C. Mempelajari dan beradaptasi", "D. Mengeluh"],
+        "kunci": "C",
+        "a": 0.20, "b": 0.30, "c": 0.40, "D": 0.10  # Soal Menengah-Mudah
+    },
+    {
+        "id": 3, 
+        "teks": "Prioritas utama dalam memberikan pelayanan publik menurut Anda adalah...",
+        "opsi": ["A. Kecepatan", "B. Kepuasan pelanggan", "C. Prosedur formal", "D. Kenyamanan petugas"],
+        "kunci": "B",
+        "a": 0.20, "b": 0.50, "c": 0.10, "c": 0.10   # Soal Menengah-Sulit, Sangat Diskriminatif
+    },
+    {
+        "id": 4, 
+        "teks": "Menghadapi rekan kerja yang berasal dari latar belakang budaya berbeda, Anda akan...",
+        "opsi": ["A. Bersikap acuh", "B. Menghargai perbedaan", "C. Menghindari", "D. Meminta pindah divisi"],
+        "kunci": "B",
+        "a": 0.15, "b": 0.55, "c": 0.20, "c": 0.10   # Soal Sedang
+    },
+    {
+        "id": 5, 
+        "teks": "Strategi paling efektif untuk mencapai target organisasi jangka panjang adalah...",
+        "opsi": ["A. Inovasi berkelanjutan", "B. Mengurangi biaya", "C. Bekerja keras", "D. Menambah personil"],
+        "kunci": "A",
+        "a": 0.60, "b": 0.10, "c": 0.15, "c": 0.15   # Soal Sulit, Daya Beda Sangat Tinggi
+    }
 ]
 
 # --- 3. FUNGSI PENDUKUNG ---
@@ -159,4 +194,5 @@ else:
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
         
+
 
