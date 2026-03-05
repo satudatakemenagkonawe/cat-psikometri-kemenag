@@ -78,20 +78,6 @@ if not st.session_state.identitas_siap:
     st.title("📝 Identitas Peserta Tes")
     st.info("Silakan isi data diri Anda sebelum memulai TES.")
     
-    with st.form("form_identitas"):
-        nama_input = st.text_input("Nama Lengkap")
-        no_peserta_input = st.text_input("Nomor peserta")
-        
-        submit_identitas = st.form_submit_button("Mulai Tes")
-        
-        if submit_identitas:
-            if nama_peserta_input and no_peserta_input:
-                st.session_state.nama_peserta = nama_peserta_input
-                st.session_state.no_peserta = no_peserta_input
-                st.session_state.identitas_siap = True
-                st.rerun()
-            else:
-                st.warning("Mohon isi Nama dan NOMOR PESERTA terlebih dahulu.")
 else:
     # --- LOGIKA TES ANDA (Yang sudah kita buat sebelumnya) ---
     st.sidebar.title("👤 Profil Peserta")
@@ -167,6 +153,7 @@ if st.session_state.index_soal == len(st.session_state.bank_soal):
             st.session_state.data_terkirim = True
             st.balloons()
             st.info("✅ Data Anda telah tercatat secara otomatis di database kantor.")
+
 
 
 
