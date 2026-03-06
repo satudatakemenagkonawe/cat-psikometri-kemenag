@@ -111,36 +111,33 @@ else:
                 st.session_state.index_soal += 1
                 st.session_state.start_time = time.time()
                 st.rerun()
-        # Contoh saat tombol 'Selesai' diklik atau soal habis
-        if st.button("Selesai Tes"):
-            data_untuk_dikirim = {
-            "nama": st.session_state.nama_user,
-            "nip": st.session_state.nip_user,
-            "theta": st.session_state.theta_akhir,
-            "rel": st.session_state.reliabilitas,
-            "sem": st.session_state.sem_akhir,
-            "skor_akhir": st.session_state.skor_0_100
-        }
-    
-        # Memanggil fungsi simpan
+
+# --- LOGIKA SELESAI TES ---
+if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
+    # 1. Siapkan data dengan nama variabel yang TEPAT sesuai Apps Script
+    data_untuk_dikirim = {
+        "nama": st.session_state.nama,
+        "nip": st.session_state.nomor_peserta,
+        "theta": st.session_state.theta,
+        "rel": st.session_state.reliability,
+        "sem": st.session_state.sem,
+        "skor_akhir": transform_ke_100(st.session_state.theta) # Pastikan fungsi ini ada
+    }
+
+    # 2. Panggil fungsi simpan
+    with st.spinner("Sedang mengirim data ke Pusat Penilaian..."):
         status = simpan_ke_gsheet(data_untuk_dikirim)
+    
+    # 3. Logika Tampilan (Hanya satu IF-ELSE)
+    if status == "Sukses":
+        st.balloons()
+        st.success(f"### Tes Selesai! Skor Akhir Anda: {data_untuk_dikirim['skor_akhir']}")
+        st.info("Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
         
-        if status == "Sukses":
-            st.success("Data berhasil disimpan ke Google Sheet!")
-            st.balloons()
-            st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
-            
-            # Menampilkan skor akhir ke user
-            skor_final = transform_ke_100(st.session_state.theta)
-            st.write(f"### Skor Akhir Anda: {skor_final}")
-        else:
-            st.error(f"Gagal menyimpan: {status}")
-            time.sleep(2)
-            st.rerun()        
-
-
-
-
-
-
-
+        # Tampilkan ringkasan di layar agar tidak hilang
+        st.write(f"Nama: {data_untuk_dikirim['nama']}")
+        st.write(f"NIP/No: {data_untuk_dikirim['nip']}")
+    else:
+        st.error(f"Gagal mengirim data: {status}")
+        if st.button("Coba Kirim Ulang"):
+            st.rerun()
