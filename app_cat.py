@@ -67,7 +67,6 @@ else:
     c1, c2 = st.columns([3, 1])
     c1.title("🛡️ Tes CAT Online")
     c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:30px; color:{'red' if rem < 10 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
-    st.markdown("---")
     
     st.markdown("""
     <style>
@@ -142,3 +141,4 @@ else:
                 kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
                 st.session_state.sent = True
                 st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
