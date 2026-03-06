@@ -7,49 +7,70 @@ import time
 st.set_page_config(page_title="Tes CAT Online", layout="wide")
 
 # --- CUSTOM CSS (Agar Tampilan Cantik & Profesional) ---
+import streamlit as st
+
+# --- CUSTOM CSS ---
 st.markdown("""
     <style>
-    .main { background-color: #5a5c57; }
+    /* 1. Latar Belakang Utama */
+    .stApp {
+        background-color: #5a5c57;
+    }
+
+    /* 2. Efek Glassmorphism untuk Kontainer/Layar CAT */
+    /* Ini akan otomatis teraplikasi pada elemen blok seperti form atau pendukungnya */
+    .stForm, .stChatMessage, div[data-testid="stVerticalBlock"] > div[style*="border"] {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+
+    /* 3. Gaya Tombol Putih dengan Bayangan Kuning 3D */
     .stButton>button {
         width: 100%;
         border-radius: 20px;
-        background-color: #2E7D32;
-        color: white;
+        background-color: #ffffff;
+        color: #2E7D32;
         font-weight: bold;
-        border: none;
-        height: 3em;
-    }
-    .stButton>button {
-        width: 100%;
-        border-radius: 20px;          /* Membuat sudut melengkung */
-        background-color: #ffffff;    /* Latar belakang putih */
-        color: #2E7D32;               /* Warna teks hijau */
-        font-weight: bold;
-        font-size: 20px;              /* Ukuran teks lebih besar */
+        font-size: 20px;
         height: 3.5em;
         border: none;
-        
-        /* EFEK BAYANGAN KUNING (3D) */
-        box-shadow: 0px 8px 0px #f1c40f; 
-        
-        /* Animasi halus saat transisi */
+        box-shadow: 0px 8px 0px #f1c40f;
+        transition: all 0.1s ease;
+        margin-top: 10px;
+    }
+
+    /* Efek Hover (Kursor di atas tombol) */
+    .stButton>button:hover {
+        background-color: #fcfcfc;
+        color: #1B5E20;
+        box-shadow: 0px 8px 0px #f1c40f;
+        border: none;
+    }
+
+    /* Efek Click (Tombol Membal/Pressed) */
+    .stButton>button:active {
+        box-shadow: 0px 2px 0px #f1c40f !important;
+        transform: translateY(6px);
         transition: all 0.1s ease;
     }
 
-    /* EFEK SAAT KURSOR DI ATAS TOMBOL */
-    .stButton>button:hover {
-        background-color: #ffffff;
-        color: #1B5E20;
-        box-shadow: 0px 8px 0px #f1c40f;
-    }
-
-    /* EFEK SAAT TOMBOL DIKLIK (MENGECIL/MEMBAL) */
-    .stButton>button:active {
-        box-shadow: 0px 2px 0px #f1c40f;
-        transform: translateY(6px);
+    /* 4. Penyesuaian Teks agar Terbaca di Background Gelap */
+    h1, h2, h3, p, label {
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
+
+# Contoh penggunaan dalam layout
+with st.container():
+    st.markdown("### Layar Simulasi CAT")
+    st.write("Silahkan tekan tombol di bawah untuk memulai.")
+    st.button("Masuk ke Ruang Tes")
 
 # --- 2. INISIALISASI STATE ---
 if 'identitas_siap' not in st.session_state:
@@ -164,6 +185,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
