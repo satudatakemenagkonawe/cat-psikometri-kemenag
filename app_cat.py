@@ -20,7 +20,7 @@ if 'total_info' not in st.session_state:
 # --- 2. FUNGSI AMBIL SOAL DINAMIS ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    url_script = "https://script.google.com/macros/s/AKfycbzBIfWRSyKF4xzPgoAhlgT5_2GMs-VRBo7QtuzIj3_Mgs7tnLTCZRo0ymt9iIwpS6E_mg/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbwRxsZQ8gJl8NTcgqb3axJ_LE3ioFGA5dpfK0pD4sWoi16h1yXKGtn36VVGuXQVn-YOtA/exec"
     try:
         response = requests.get(url_script)
         return response.json()
@@ -107,5 +107,6 @@ else:
         st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
         st.balloons()
         st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+
 
 
