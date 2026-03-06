@@ -112,36 +112,34 @@ else:
                 st.session_state.start_time = time.time()
                 st.rerun()
 
-# --- LOGIKA SELESAI TES ---
-if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
-    soal_selesai = st.session_state.jumlah_dikerjakan >= 60
-    # 1. Siapkan data dengan nama variabel yang TEPAT sesuai Apps Script
-    data_untuk_dikirim = {
-        "nama": st.session_state.nama,
-        "nip": st.session_state.nomor_peserta,
-        "theta": st.session_state.theta,
-        "rel": st.session_state.reliability,
-        "sem": st.session_state.sem,
-        "skor_akhir": transform_ke_100(st.session_state.theta) # Pastikan fungsi ini ada
-    }
+        # --- LOGIKA SELESAI TES ---
+        if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
+            soal_selesai = st.session_state.jumlah_dikerjakan >= 60
+        # 1. Siapkan data dengan nama variabel yang TEPAT sesuai Apps Script
+        data_untuk_dikirim = {
+            "nama": st.session_state.nama,
+            "nip": st.session_state.nomor_peserta,
+            "theta": st.session_state.theta,
+            "rel": st.session_state.reliability,
+            "sem": st.session_state.sem,
+            "skor_akhir": transform_ke_100(st.session_state.theta) # Pastikan fungsi ini ada
+        }
 
-    # 2. Panggil fungsi simpan
-    with st.spinner("Sedang mengirim data ke Pusat Penilaian..."):
-        status = simpan_ke_gsheet(data_untuk_dikirim)
+        # 2. Panggil fungsi simpan
+        with st.spinner("Sedang mengirim data ke Pusat Penilaian..."):
+            status = simpan_ke_gsheet(data_untuk_dikirim)
     
-    # 3. Logika Tampilan (Hanya satu IF-ELSE)
-    if status == "Sukses":
-        st.balloons()
-        st.success(f"### Tes Selesai! Skor Akhir Anda: {data_untuk_dikirim['skor_akhir']}")
-        st.info("Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
+        # 3. Logika Tampilan (Hanya satu IF-ELSE)
+        if status == "Sukses":
+            st.balloons()
+            st.success(f"### Tes Selesai! Skor Akhir Anda: {data_untuk_dikirim['skor_akhir']}")
+            st.info("Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
         
-        # Tampilkan ringkasan di layar agar tidak hilang
-        st.write(f"Nama: {data_untuk_dikirim['nama']}")
-        st.write(f"NIP/No: {data_untuk_dikirim['nip']}")
-    if st.button("Coba Kirim Ulang"):
-        st.rerun()
-    else:
-        st.error(f"Gagal mengirim data: {status}")
+            # Tampilkan ringkasan di layar agar tidak hilang
+            st.write(f"Nama: {data_untuk_dikirim['nama']}")
+            st.write(f"NIP/No: {data_untuk_dikirim['nip']}")
+        if st.button("Coba Kirim Ulang"):
+            st.rerun()
+        else:
+            st.error(f"Gagal mengirim data: {status}")
     
-
-
