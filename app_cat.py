@@ -62,7 +62,7 @@ if not st.session_state.identitas_siap:
 else:
     # HEADER KANAN ATAS
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 60 - int(elapsed))
+    rem = max(0, 20 - int(elapsed))
     
     c1, c2 = st.columns([3, 1])
     c1.title("🛡️ Tes CAT Online")
@@ -106,7 +106,7 @@ else:
         st.rerun()
     else:
         # HALAMAN HASIL
-        skor_final = transform_ke_100(st.session_state.theta)
+        skor_akhir = transform_ke_100(st.session_state.theta)
         rel = st.session_state.total_info / (st.session_state.total_info + 1)
         sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
         
@@ -118,5 +118,6 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
