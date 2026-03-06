@@ -6,6 +6,7 @@ import time
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Tes CAT Online", layout="wide")
 
+import streamlit as st
 # --- CUSTOM CSS (Agar Tampilan Cantik & Profesional) ---
 st.markdown("""
     <style>
@@ -62,12 +63,6 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-
-# Contoh penggunaan dalam layout
-with st.container():
-    st.markdown("### Layar Simulasi CAT")
-    st.write("Silahkan tekan tombol di bawah untuk memulai.")
-    st.button("Masuk ke Ruang Tes")
 
 # --- 2. INISIALISASI STATE ---
 if 'identitas_siap' not in st.session_state:
@@ -182,6 +177,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
