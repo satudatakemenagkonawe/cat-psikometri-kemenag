@@ -138,8 +138,10 @@ if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
         # Tampilkan ringkasan di layar agar tidak hilang
         st.write(f"Nama: {data_untuk_dikirim['nama']}")
         st.write(f"NIP/No: {data_untuk_dikirim['nip']}")
-    else:
-        st.error(f"Gagal mengirim data: {status}")
     if st.button("Coba Kirim Ulang"):
         st.rerun()
+    else:
+        st.error(f"Gagal mengirim data: {status}")
+    
+
 
