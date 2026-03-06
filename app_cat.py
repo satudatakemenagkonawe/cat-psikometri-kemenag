@@ -20,12 +20,13 @@ if 'total_info' not in st.session_state:
 # --- 2. FUNGSI AMBIL SOAL DINAMIS ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
+def simpan_ke_gsheet(hasil_data):
     url_script = "https://script.google.com/macros/s/AKfycbwRxsZQ8gJl8NTcgqb3axJ_LE3ioFGA5dpfK0pD4sWoi16h1yXKGtn36VVGuXQVn-YOtA/exec"
     try:
-        response = requests.get(url_script)
-        return response.json()
-    except:
-        return []
+        response = requests.post(url_script, json=hasil_data)
+        return response.text
+    except Exception as e:
+        return str(e)
         
 # Load soal ke session state
 if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
@@ -100,13 +101,29 @@ else:
                 st.session_state.index_soal += 1
                 st.session_state.start_time = time.time()
                 st.rerun()
-        
-        time.sleep(1)
-        st.rerun()
-    else:
-        st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
-        st.balloons()
-        st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+        # Contoh saat tombol 'Selesai' diklik atau soal habis
+        if st.button("Selesai Tes"):
+            data_untuk_dikirim = {
+            "nama": st.session_state.nama_user,
+            "nip": st.session_state.nip_user,
+            "theta": st.session_state.theta_akhir,
+            "rel": st.session_state.reliabilitas,
+            "sem": st.session_state.sem_akhir,
+            "skor_akhir": st.session_state.skor_0_100
+        }
+    
+        status = simpan_ke_gsheet(data_untuk_dikirim)
+        if status == "Sukses":
+            st.success("Data berhasil disimpan ke Google Sheet!")
+        else:
+            st.error(f"Gagal menyimpan: {status}")
+            time.sleep(1)
+            st.rerun()
+        else:
+            st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
+            st.balloons()
+            st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+
 
 
 
