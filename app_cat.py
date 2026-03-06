@@ -103,12 +103,12 @@ else:
     """, unsafe_allow_html=True)
     # Tambahkan Progress Bar di bawah header
     progress = (st.session_state.index_soal) / len(st.session_state.bank_soal)
-        st.progress(progress)
+    st.progress(progress)
 
-            if st.session_state.index_soal < len(st.session_state.bank_soal):
-                if rem <= 0:
-                    st.session_state.index_soal += 1
-                    st.session_state.start_time = time.time()
+        if st.session_state.index_soal < len(st.session_state.bank_soal):
+            if rem <= 0:
+                st.session_state.index_soal += 1
+                st.session_state.start_time = time.time()
                     st.rerun()
                 sisa = [s for s in st.session_state.bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
                 if not sisa: # Antisipasi jika soal habis
@@ -142,4 +142,5 @@ else:
                         kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
                         st.session_state.sent = True
                         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
