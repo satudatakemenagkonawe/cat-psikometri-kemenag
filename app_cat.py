@@ -122,13 +122,13 @@ else:
             if st.button("Simpan & Lanjutkan"):
                 if pilihan:
                     skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
-                        st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                            p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                        st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
-                        st.session_state.soal_selesai.append(soal)
-                        st.session_state.index_soal += 1
-                        st.session_state.start_time = time.time()
-                        st.rerun()
+                    st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                        p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                    st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+                    st.session_state.soal_selesai.append(soal)
+                    st.session_state.index_soal += 1
+                    st.session_state.start_time = time.time()
+                    st.rerun()
             time.sleep(1)
                 st.rerun()
         else:
@@ -142,6 +142,7 @@ else:
                     kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
                     st.session_state.sent = True
                     st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
 
