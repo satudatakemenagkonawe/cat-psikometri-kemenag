@@ -20,13 +20,23 @@ if 'total_info' not in st.session_state:
 # --- 2. FUNGSI AMBIL SOAL DINAMIS ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    try:
+        response = requests.get(url_script)
+        return response.json()
+    except Exception as e:
+        st.error(f"Gagal mengambil soal: {e}")
+        return []
+
+# --- 3. FUNGSI SIMPAN HASIL KE GSHEET ---
 def simpan_ke_gsheet(hasil_data):
     url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
     try:
+        # Mengirim data hasil tes ke fungsi doPost di Apps Script
         response = requests.post(url_script, json=hasil_data)
         return response.text
     except Exception as e:
-        return str(e)
+        return f"Error: {str(e)}"
         
 # Load soal ke session state
 if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
@@ -123,6 +133,7 @@ else:
             st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
             st.balloons()
             st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+
 
 
 
