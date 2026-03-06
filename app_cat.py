@@ -140,5 +140,6 @@ if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
         st.write(f"NIP/No: {data_untuk_dikirim['nip']}")
     else:
         st.error(f"Gagal mengirim data: {status}")
-        if st.button("Coba Kirim Ulang"):
-        
+    if st.button("Coba Kirim Ulang"):
+        st.rerun()
+
