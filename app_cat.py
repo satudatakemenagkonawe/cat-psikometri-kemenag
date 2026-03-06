@@ -115,8 +115,8 @@ else:
                 st.session_state.index_soal = len(st.session_state.bank_soal)
                 st.rerun()
             soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
-                st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
-                st.info(soal['teks'])
+            st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
+            st.info(soal['teks'])
             opsi_lengkap = [f"A. {soal['opsi_A']}", f"B. {soal['opsi_B']}", f"C. {soal['opsi_C']}", f"D. {soal['opsi_D']}"]
             pilihan = st.radio("Pilih jawaban Anda:", opsi_lengkap, index=None)
             if st.button("Simpan & Lanjutkan"):
@@ -142,6 +142,7 @@ else:
                     kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
                     st.session_state.sent = True
                     st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
 
