@@ -122,17 +122,22 @@ else:
             "skor_akhir": st.session_state.skor_0_100
         }
     
+        # Memanggil fungsi simpan
         status = simpan_ke_gsheet(data_untuk_dikirim)
+        
         if status == "Sukses":
             st.success("Data berhasil disimpan ke Google Sheet!")
+            st.balloons()
+            st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
+            
+            # Menampilkan skor akhir ke user
+            skor_final = transform_ke_100(st.session_state.theta)
+            st.write(f"### Skor Akhir Anda: {skor_final}")
         else:
             st.error(f"Gagal menyimpan: {status}")
-            time.sleep(1)
-            st.rerun()
-        else:
-            st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
-            st.balloons()
-            st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+            time.sleep(2)
+            st.rerun()        
+
 
 
 
