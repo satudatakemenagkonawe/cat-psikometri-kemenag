@@ -105,42 +105,43 @@ else:
     progress = (st.session_state.index_soal) / len(st.session_state.bank_soal)
     st.progress(progress)
 
-        if st.session_state.index_soal < len(st.session_state.bank_soal):
-            if rem <= 0:
-                st.session_state.index_soal += 1
-                st.session_state.start_time = time.time()
-                    st.rerun()
-                sisa = [s for s in st.session_state.bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
-                if not sisa: # Antisipasi jika soal habis
-                     st.session_state.index_soal = len(st.session_state.bank_soal)
-                     st.rerun()
-                soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
-                    st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
-                    st.info(soal['teks'])
-                opsi_lengkap = [f"A. {soal['opsi_A']}", f"B. {soal['opsi_B']}", f"C. {soal['opsi_C']}", f"D. {soal['opsi_D']}"]
-                pilihan = st.radio("Pilih jawaban Anda:", opsi_lengkap, index=None)
-                if st.button("Simpan & Lanjutkan"):
-                    if pilihan:
-                        skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
-                            st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                                p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                            st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
-                            st.session_state.soal_selesai.append(soal)
-                            st.session_state.index_soal += 1
-                            st.session_state.start_time = time.time()
-                            st.rerun()
-                time.sleep(1)
-                    st.rerun()
-            else:
-                skor_akhir = transform_ke_100(st.session_state.theta)
-                rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
-                sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
-                    st.balloons()
-                    st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
-                    st.metric(label="SKOR FINAL", value=f"{skor_akhir}")
-                    if 'sent' not in st.session_state:
-                        kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
-                        st.session_state.sent = True
-                        st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+    if st.session_state.index_soal < len(st.session_state.bank_soal):
+        if rem <= 0:
+            st.session_state.index_soal += 1
+            st.session_state.start_time = time.time()
+                st.rerun()
+            sisa = [s for s in st.session_state.bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
+            if not sisa: # Antisipasi jika soal habis
+                st.session_state.index_soal = len(st.session_state.bank_soal)
+                st.rerun()
+            soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
+                st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
+                st.info(soal['teks'])
+            opsi_lengkap = [f"A. {soal['opsi_A']}", f"B. {soal['opsi_B']}", f"C. {soal['opsi_C']}", f"D. {soal['opsi_D']}"]
+            pilihan = st.radio("Pilih jawaban Anda:", opsi_lengkap, index=None)
+            if st.button("Simpan & Lanjutkan"):
+                if pilihan:
+                    skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
+                        st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                            p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                        st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+                        st.session_state.soal_selesai.append(soal)
+                        st.session_state.index_soal += 1
+                        st.session_state.start_time = time.time()
+                        st.rerun()
+            time.sleep(1)
+                st.rerun()
+        else:
+            skor_akhir = transform_ke_100(st.session_state.theta)
+            rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
+            sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+                st.balloons()
+                st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
+                st.metric(label="SKOR FINAL", value=f"{skor_akhir}")
+                if 'sent' not in st.session_state:
+                    kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
+                    st.session_state.sent = True
+                    st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
