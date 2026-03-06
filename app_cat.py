@@ -17,10 +17,10 @@ if 'soal_selesai' not in st.session_state:
 if 'total_info' not in st.session_state:
     st.session_state.total_info = 0
 
-# --- 2. FUNGSI AMBIL SOAL DINAMIS ---
+# --- 2. FUNGSI AMBIL & KIRIM DATA ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    # GANTI URL DI BAWAH DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    # URL Apps Script Anda (Gunakan satu URL yang sama untuk GET dan POST)
     url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
     try:
         response = requests.get(url_script)
@@ -28,7 +28,23 @@ def ambil_bank_soal():
     except:
         return []
 
-# Load soal ke session state
+def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    payload = {
+        "nama": nama,
+        "nip": nip,
+        "theta": round(theta, 4),
+        "rel": round(rel, 4),
+        "sem": round(sem, 4),
+        "skor_akhir": skor
+    }
+    try:
+        requests.post(url_script, json=payload)
+        return True
+    except:
+        return False
+
+# Load soal
 if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
     st.session_state.bank_soal = ambil_bank_soal()
 
@@ -60,9 +76,8 @@ if not st.session_state.identitas_siap:
                 st.error("Bank soal kosong. Periksa Google Sheets dan Apps Script Anda.")
             else: st.error("Lengkapi data diri.")
 else:
-    # HEADER KANAN ATAS
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 20 - int(elapsed))
+    rem = max(0, 20 - int(elapsed)) # Kembali ke 60 detik agar manusiawi
     
     c1, c2 = st.columns([3, 1])
     c1.title("🛡️ Tes CAT Online")
@@ -75,20 +90,17 @@ else:
             st.session_state.start_time = time.time()
             st.rerun()
 
-        # Adaptive Selection
         sisa = [s for s in st.session_state.bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
+        if not sisa: # Antisipasi jika soal habis
+             st.session_state.index_soal = len(st.session_state.bank_soal)
+             st.rerun()
+             
         soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
         
         st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
         st.info(soal['teks'])
         
-        # Opsi jawaban dari kolom opsi_A sampai opsi_D
-        opsi_lengkap = [
-            f"A. {soal['opsi_A']}",
-            f"B. {soal['opsi_B']}",
-            f"C. {soal['opsi_C']}",
-            f"D. {soal['opsi_D']}"
-        ]
+        opsi_lengkap = [f"A. {soal['opsi_A']}", f"B. {soal['opsi_B']}", f"C. {soal['opsi_C']}", f"D. {soal['opsi_D']}"]
         pilihan = st.radio("Pilih jawaban Anda:", opsi_lengkap, index=None)
         
         if st.button("Simpan & Lanjutkan"):
@@ -107,7 +119,7 @@ else:
     else:
         # HALAMAN HASIL
         skor_akhir = transform_ke_100(st.session_state.theta)
-        rel = st.session_state.total_info / (st.session_state.total_info + 1)
+        rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
         sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
         
         st.balloons()
@@ -115,12 +127,7 @@ else:
         st.metric(label="SKOR FINAL", value=f"{skor_akhir}")
         
         if 'sent' not in st.session_state:
-            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, st.session_state.theta.rel, st.session_state.theta.sem, st.session_state.theta.skor_akhir)
+            # PERBAIKAN: Memanggil variabel lokal rel, sem, dan skor_akhir
+            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
             st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
-
-
-
-
-
-
