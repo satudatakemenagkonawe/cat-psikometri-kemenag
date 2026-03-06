@@ -21,7 +21,7 @@ if 'total_info' not in st.session_state:
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
 def simpan_ke_gsheet(hasil_data):
-    url_script = "https://script.google.com/macros/s/AKfycbwRxsZQ8gJl8NTcgqb3axJ_LE3ioFGA5dpfK0pD4sWoi16h1yXKGtn36VVGuXQVn-YOtA/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
     try:
         response = requests.post(url_script, json=hasil_data)
         return response.text
@@ -123,6 +123,7 @@ else:
             st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
             st.balloons()
             st.info("SELAMAT... Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")        
+
 
 
 
