@@ -125,7 +125,7 @@ def transform_ke_100(theta):
 # --- 5. ANTARMUKA ---
 if not st.session_state.identitas_siap:
     # HALAMAN LOGIN
-    st.markdown("<h1 style='text-align: center; color: #2E7D32;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #1a4d2e;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
     with st.columns([1, 2, 1])[1]:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap")
@@ -144,7 +144,7 @@ else:
     
     col_t, col_p = st.columns([3, 1])
     col_t.title("🛡️ CAT Online")
-    col_p.markdown(f"<div style='text-align:right; border-left: 3px solid #2E7D32; padding-left: 10px;'><b>👤 {st.session_state.nama}</b><br><span style='font-size:25px; color:{'red' if rem < 10 else '#2E7D32'};'>⏱️ {rem} s</span></div>", unsafe_allow_html=True)
+    col_p.markdown(f"<div style='text-align:center; border-left: 3px solid #2E7D32; padding-left: 10px;'><b>👤 {st.session_state.nama}</b><br><span style='font-size:40px; color:{'blue' if rem < 10 else '#2E7D32'};'>⏱️ {rem} s</span></div>", unsafe_allow_html=True)
     
     st.progress(st.session_state.index_soal / len(st.session_state.bank_soal))
 
@@ -190,6 +190,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
