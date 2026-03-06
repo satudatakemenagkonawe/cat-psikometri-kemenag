@@ -19,9 +19,35 @@ st.markdown("""
         border: none;
         height: 3em;
     }
-    .stButton>button:hover { background-color: #1B5E20; border: none; color: white; }
-    .stAlert { border-radius: 15px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    div[data-testid="stMetricValue"] { font-size: 45px; color: #2E7D32; }
+.stButton>button {
+        width: 100%;
+        border-radius: 20px;          /* Membuat sudut melengkung */
+        background-color: #ffffff;    /* Latar belakang putih */
+        color: #2E7D32;               /* Warna teks hijau */
+        font-weight: bold;
+        font-size: 20px;              /* Ukuran teks lebih besar */
+        height: 3.5em;
+        border: none;
+        
+        /* EFEK BAYANGAN KUNING (3D) */
+        box-shadow: 0px 8px 0px #f1c40f; 
+        
+        /* Animasi halus saat transisi */
+        transition: all 0.1s ease;
+    }
+
+    /* EFEK SAAT KURSOR DI ATAS TOMBOL */
+    .stButton>button:hover {
+        background-color: #ffffff;
+        color: #1B5E20;
+        box-shadow: 0px 8px 0px #f1c40f;
+    }
+
+    /* EFEK SAAT TOMBOL DIKLIK (MENGECIL/MEMBAL) */
+    .stButton>button:active {
+        box-shadow: 0px 2px 0px #f1c40f;
+        transform: translateY(6px);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -138,3 +164,4 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
