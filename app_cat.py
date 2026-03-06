@@ -13,7 +13,7 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         border-radius: 20px;
-        background-color: #2E7D32;
+        background-color: #5a5c57;
         color: white;
         font-weight: bold;
         border: none;
@@ -164,5 +164,6 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
