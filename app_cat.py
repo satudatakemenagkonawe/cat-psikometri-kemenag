@@ -113,6 +113,7 @@ else:
                 st.rerun()
 
 # --- LOGIKA SELESAI TES ---
+soal_selesai = st.session_state.jumlah_dikerjakan >= 60
 if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
     # 1. Siapkan data dengan nama variabel yang TEPAT sesuai Apps Script
     data_untuk_dikirim = {
@@ -141,3 +142,4 @@ if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
         st.error(f"Gagal mengirim data: {status}")
         if st.button("Coba Kirim Ulang"):
             st.rerun()
+
