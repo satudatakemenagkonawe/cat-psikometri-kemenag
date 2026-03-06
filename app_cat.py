@@ -114,10 +114,11 @@ else:
         st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
         st.metric(label="SKOR FINAL", value=f"{skor_akhir}")
         
-    if 'sent' not in st.session_state:
-        kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, st.session_state.theta.rel, st.session_state.theta.sem, st.session_state.theta.skor_akhir)
-        st.session_state.sent = True
+        if 'sent' not in st.session_state:
+            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, st.session_state.theta.rel, st.session_state.theta.sem, st.session_state.theta.skor_akhir)
+            st.session_state.sent = True
         st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
+
 
 
 
