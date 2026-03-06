@@ -130,22 +130,15 @@ else:
                     st.session_state.start_time = time.time()
                     st.rerun()
             time.sleep(1)
-                st.rerun()
+            st.rerun()
         else:
             skor_akhir = transform_ke_100(st.session_state.theta)
             rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
             sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
-                st.balloons()
-                st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
-                st.metric(label="SKOR FINAL", value=f"{skor_akhir}")
-                if 'sent' not in st.session_state:
-                    kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
-                    st.session_state.sent = True
-                    st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
-
-
-
-
-
-
-
+            st.balloons()
+            st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
+            st.metric(label="SKOR FINAL", value=f"{skor_akhir}")
+            if 'sent' not in st.session_state:
+                kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
+                st.session_state.sent = True
+                st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
