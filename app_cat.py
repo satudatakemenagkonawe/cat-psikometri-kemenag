@@ -7,62 +7,75 @@ import time
 st.set_page_config(page_title="Tes CAT Online", layout="wide")
 
 import streamlit as st
-# --- CUSTOM CSS (Agar Tampilan Cantik & Profesional) ---
+
+# --- CUSTOM CSS (Tampilan Profesional & Glassmorphism) ---
 st.markdown("""
     <style>
-    /* 1. Latar Belakang Utama */
+    /* 1. Mengatur Latar Belakang Utama */
     .stApp {
         background-color: #5a5c57;
     }
 
-    /* 2. Efek Glassmorphism untuk Kontainer/Layar CAT */
-    /* Ini akan otomatis teraplikasi pada elemen blok seperti form atau pendukungnya */
-    .stForm, .stChatMessage, div[data-testid="stVerticalBlock"] > div[style*="border"] {
+    /* 2. Efek Glassmorphism (Kaca Buram) untuk Layar CAT */
+    /* Gunakan kontainer ini untuk membungkus elemen form/text */
+    .glass-card {
         background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 20px;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-radius: 25px;
         border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 20px;
+        padding: 30px;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
     }
 
-    /* 3. Gaya Tombol Putih dengan Bayangan Kuning 3D */
+    /* 3. Gaya Tombol Putih dengan Bayangan Kuning (Persis Gambar Pertama) */
     .stButton>button {
         width: 100%;
         border-radius: 20px;
-        background-color: #ffffff;
-        color: #2E7D32;
+        background-color: #ffffff;    /* Warna Putih */
+        color: #1a4d2e;               /* Warna Teks Hijau Tua */
         font-weight: bold;
         font-size: 20px;
         height: 3.5em;
         border: none;
-        box-shadow: 0px 8px 0px #f1c40f;
+        
+        /* Efek Shadow Kuning 3D */
+        box-shadow: 0px 8px 0px #f1c40f; 
         transition: all 0.1s ease;
-        margin-top: 10px;
     }
 
-    /* Efek Hover (Kursor di atas tombol) */
+    /* Efek Hover (Saat kursor di atas tombol) */
     .stButton>button:hover {
-        background-color: #fcfcfc;
+        background-color: #ffffff;
         color: #1B5E20;
         box-shadow: 0px 8px 0px #f1c40f;
         border: none;
     }
 
-    /* Efek Click (Tombol Membal/Pressed) */
+    /* Efek Klik (Tombol Membal ke Bawah) */
     .stButton>button:active {
         box-shadow: 0px 2px 0px #f1c40f !important;
         transform: translateY(6px);
-        transition: all 0.1s ease;
     }
 
-    /* 4. Penyesuaian Teks agar Terbaca di Background Gelap */
-    h1, h2, h3, p, label {
+    /* Penyesuaian warna teks standar agar putih (terbaca di bg gelap) */
+    h1, h2, h3, p, label, .stMarkdown {
         color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
+
+# --- CARA PENGGUNAAN DI STREAMLIT ---
+
+# Membungkus konten dalam Glass Effect
+st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+st.subheader("Simulasi CAT - Ruang Tes")
+st.write("Klik tombol di bawah untuk masuk ke ruang ujian.")
+
+# Tombol yang sudah berubah warnanya
+st.button("Masuk ke Ruang Tes")
+st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 2. INISIALISASI STATE ---
 if 'identitas_siap' not in st.session_state:
@@ -116,8 +129,8 @@ if not st.session_state.identitas_siap:
     with st.columns([1, 2, 1])[1]:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap")
-            nip = st.text_input("Nomor Peserta / NIP")
-            if st.form_submit_button("Masuk ke Ruang Tes"):
+            nip = st.text_input("Nomor Peserta")
+            if st.form_submit_button("Mulai Tes"):
                 if nama and nip and st.session_state.bank_soal:
                     st.session_state.nama, st.session_state.nip = nama, nip
                     st.session_state.identitas_siap = True
@@ -177,6 +190,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
