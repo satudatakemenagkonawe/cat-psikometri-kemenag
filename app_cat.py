@@ -4,7 +4,7 @@ import requests
 import time
 
 # --- 1. KONFIGURASI HALAMAN & STATE ---
-st.set_page_config(page_title="Tes CAT Online", layout="wide")
+st.set_page_config(page_title="CAT Kemenag Konawe", layout="wide")
 
 if 'identitas_siap' not in st.session_state:
     st.session_state.identitas_siap = False
@@ -20,24 +20,14 @@ if 'total_info' not in st.session_state:
 # --- 2. FUNGSI AMBIL SOAL DINAMIS ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    # GANTI URL DI BAWAH DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
+    url_script = "https://script.google.com/macros/s/AKfycb...anda/exec"
     try:
         response = requests.get(url_script)
         return response.json()
-    except Exception as e:
-        st.error(f"Gagal mengambil soal: {e}")
+    except:
         return []
 
-# --- 3. FUNGSI SIMPAN HASIL KE GSHEET ---
-def simpan_ke_gsheet(hasil_data):
-    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
-    try:
-        # Mengirim data hasil tes ke fungsi doPost di Apps Script
-        response = requests.post(url_script, json=hasil_data)
-        return response.text
-    except Exception as e:
-        return f"Error: {str(e)}"
-        
 # Load soal ke session state
 if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
     st.session_state.bank_soal = ambil_bank_soal()
@@ -59,7 +49,7 @@ if not st.session_state.identitas_siap:
     st.title("🛡️ Tes CAT Online")
     with st.form("login"):
         nama = st.text_input("Nama Lengkap")
-        nip = st.text_input("Nomor Peserta")
+        nip = st.text_input("NIP / Nomor Pegawai")
         if st.form_submit_button("Mulai Tes"):
             if nama and nip and st.session_state.bank_soal:
                 st.session_state.nama, st.session_state.nip = nama, nip
@@ -72,11 +62,11 @@ if not st.session_state.identitas_siap:
 else:
     # HEADER KANAN ATAS
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 20 - int(elapsed))
+    rem = max(0, 60 - int(elapsed))
     
     c1, c2 = st.columns([3, 1])
     c1.title("🛡️ Tes CAT Online")
-    c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:30px; color:{'red' if rem < 20 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:20px; color:{'red' if rem < 10 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
     st.markdown("---")
 
     if st.session_state.index_soal < len(st.session_state.bank_soal):
@@ -111,35 +101,9 @@ else:
                 st.session_state.index_soal += 1
                 st.session_state.start_time = time.time()
                 st.rerun()
-
-        # --- LOGIKA SELESAI TES ---
-        if soal_selesai:  # Ganti dengan variabel pemicu selesai Anda
-            soal_selesai = st.session_state.jumlah_dikerjakan >= 60
-        # 1. Siapkan data dengan nama variabel yang TEPAT sesuai Apps Script
-        data_untuk_dikirim = {
-            "nama": st.session_state.nama,
-            "nip": st.session_state.nomor_peserta,
-            "theta": st.session_state.theta,
-            "rel": st.session_state.reliability,
-            "sem": st.session_state.sem,
-            "skor_akhir": transform_ke_100(st.session_state.theta) # Pastikan fungsi ini ada
-        }
-
-        # 2. Panggil fungsi simpan
-        with st.spinner("Sedang mengirim data ke Pusat Penilaian..."):
-            status = simpan_ke_gsheet(data_untuk_dikirim)
-    
-        # 3. Logika Tampilan (Hanya satu IF-ELSE)
-        if status == "Sukses":
-            st.balloons()
-            st.success(f"### Tes Selesai! Skor Akhir Anda: {data_untuk_dikirim['skor_akhir']}")
-            st.info("Data detail hasil tes telah dikirim ke PUSAT DATA PENILAIAN.")
         
-            # Tampilkan ringkasan di layar agar tidak hilang
-            st.write(f"Nama: {data_untuk_dikirim['nama']}")
-            st.write(f"NIP/No: {data_untuk_dikirim['nip']}")
-        if st.button("Coba Kirim Ulang"):
-            st.rerun()
-        else:
-            st.error(f"Gagal mengirim data: {status}")
-    
+        time.sleep(1)
+        st.rerun()
+    else:
+        st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
+        st.balloons()
