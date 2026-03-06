@@ -4,7 +4,7 @@ import requests
 import time
 
 # --- 1. KONFIGURASI HALAMAN & STATE ---
-st.set_page_config(page_title="CAT Kemenag Konawe", layout="wide")
+st.set_page_config(page_title="Tes CAT Online", layout="wide")
 
 if 'identitas_siap' not in st.session_state:
     st.session_state.identitas_siap = False
@@ -21,7 +21,7 @@ if 'total_info' not in st.session_state:
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
     # GANTI URL DI BAWAH DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA
-    url_script = "https://script.google.com/macros/s/AKfycb...anda/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
     try:
         response = requests.get(url_script)
         return response.json()
@@ -49,7 +49,7 @@ if not st.session_state.identitas_siap:
     st.title("🛡️ Tes CAT Online")
     with st.form("login"):
         nama = st.text_input("Nama Lengkap")
-        nip = st.text_input("NIP / Nomor Pegawai")
+        nip = st.text_input("Nomor Peserta")
         if st.form_submit_button("Mulai Tes"):
             if nama and nip and st.session_state.bank_soal:
                 st.session_state.nama, st.session_state.nip = nama, nip
@@ -66,7 +66,7 @@ else:
     
     c1, c2 = st.columns([3, 1])
     c1.title("🛡️ Tes CAT Online")
-    c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:20px; color:{'red' if rem < 10 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div style='text-align:right'><b>👤 {st.session_state.nama}</b><br><span style='font-size:30px; color:{'red' if rem < 10 else 'black'}'>⏱️ {rem} Detik</span></div>", unsafe_allow_html=True)
     st.markdown("---")
 
     if st.session_state.index_soal < len(st.session_state.bank_soal):
@@ -105,5 +105,16 @@ else:
         time.sleep(1)
         st.rerun()
     else:
-        st.success(f"Tes Selesai! Skor Akhir Anda: {transform_ke_100(st.session_state.theta)}")
+        # HALAMAN HASIL
+        skor_final = transform_ke_100(st.session_state.theta)
+        rel = st.session_state.total_info / (st.session_state.total_info + 1)
+        sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+        
         st.balloons()
+        st.success(f"Selamat {st.session_state.nama}, Anda telah menyelesaikan tes!")
+        st.metric(label="SKOR AKHIR", value=f"{skor_akhir}")
+        
+        if 'sent' not in st.session_state:
+            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor_akhir)
+            st.session_state.sent = True
+        st.info("Data telah dikirimkan ke PUSAT DATA PENILAIAN.")
