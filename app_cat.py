@@ -1,67 +1,52 @@
-# ==========================================
-# 1. IMPORT PERPUSTAKAAN UTAMA (WAJIB)
-# ==========================================
 import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
 import time
 import datetime
-
-# ==========================================
-# 2. IMPORT KONEKSI GOOGLE SHEETS
-# ==========================================
 from streamlit_gsheets import GSheetsConnection
 
-# ==========================================
-# 3. KONFIGURASI HALAMAN (OPSIONAL TAPI BAGUS)
-# ==========================================
-st.set_page_config(
-    page_title="CAT Online Psikometri",
-    page_icon="📝",
-    layout="centered"
-)
-
-# Coba ganti bagian ini sementara untuk tes
+# --- 1. INISIALISASI KONEKSI (WAJIB ADA) ---
 try:
-    df = conn.read(worksheet="Settings")
-    st.write("Koneksi Berhasil!")
+    conn = st.connection("gsheets", type=GSheetsConnection)
 except Exception as e:
-    st.error(f"Gagal konek karena: {e}")
+    st.error("Gagal inisialisasi koneksi. Periksa file secrets kamu.")
 
-# Membuat koneksi ke Google Sheet
-conn = st.connection("gsheets", type=GSheetsConnection)
-
-# Membaca data dari sheet 'Settings'
+# --- 2. FUNGSI AMBIL KODE DARI GOOGLE SHEET ---
 def get_access_code():
-    # Ganti URL_SHEET dengan link Google Sheet kamu yang sudah di-share
-    df = conn.read(worksheet="Settings")
-    # Mengambil nilai kode dari baris yang parameternya 'access_code'
-    code = df.loc[df['parameter'] == 'access_code', 'value'].values[0]
-    return str(code)
+    try:
+        # Membaca sheet bernama 'Settings'
+        df = conn.read(worksheet="Settings")
+        # Mengambil nilai dari kolom 'value' di mana 'parameter' adalah 'access_code'
+        code = df.loc[df['parameter'] == 'access_code', 'value'].values[0]
+        return str(code)
+    except Exception as e:
+        st.error(f"Gagal konek karena: {e}")
+        return None
 
-# Ambil kode terbaru dari Google Sheet
-VALID_CODE_FROM_SHEET = get_access_code()
-
-# --- Logika Login ---
+# --- 3. LOGIKA GATEKEEPER ---
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
+# Ambil kode terbaru
+VALID_CODE = get_access_code()
+
 if not st.session_state['authenticated']:
-    st.title("🔐 Masukkan Kode Sesi")
-    user_input = st.text_input("Kode Akses:", type="password")
+    st.title("🔐 Akses Terkunci")
+    st.write("Silakan masukkan kode sesi untuk memulai ujian.")
+    
+    input_user = st.text_input("Kode Akses:", type="password")
     
     if st.button("Masuk"):
-        if user_input == VALID_CODE_FROM_SHEET:
+        if VALID_CODE and input_user == VALID_CODE:
             st.session_state['authenticated'] = True
             st.rerun()
         else:
-            st.error("Kode salah! Silakan tanya pengawas.")
-    st.stop()
+            st.error("Kode salah atau tidak dapat terhubung ke server.")
+    st.stop() # Berhenti di sini jika belum login
 
-# --- Jika Berhasil, Tampilkan Soal ---
-st.success("Selamat mengerjakan!")
-# Ambil soal dari sheet yang sama menggunakan conn.read(worksheet="Bank Soal")
+# --- KODE UJIAN KAMU DI BAWAH INI ---
+st.success("Koneksi Berhasil! Selamat mengerjakan.")
 
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Tes CAT Online", layout="wide")
@@ -237,6 +222,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
