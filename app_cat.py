@@ -5,6 +5,40 @@ import numpy as np               # Boleh tetap ada jika sudah dipakai di kode la
 import requests
 import time
 
+# Membuat koneksi ke Google Sheet
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+# Membaca data dari sheet 'Settings'
+def get_access_code():
+    # Ganti URL_SHEET dengan link Google Sheet kamu yang sudah di-share
+    df = conn.read(worksheet="Settings")
+    # Mengambil nilai kode dari baris yang parameternya 'access_code'
+    code = df.loc[df['parameter'] == 'access_code', 'value'].values[0]
+    return str(code)
+
+# Ambil kode terbaru dari Google Sheet
+VALID_CODE_FROM_SHEET = get_access_code()
+
+# --- Logika Login ---
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+if not st.session_state['authenticated']:
+    st.title("🔐 Masukkan Kode Sesi")
+    user_input = st.text_input("Kode Akses:", type="password")
+    
+    if st.button("Masuk"):
+        if user_input == VALID_CODE_FROM_SHEET:
+            st.session_state['authenticated'] = True
+            st.rerun()
+        else:
+            st.error("Kode salah! Silakan tanya pengawas.")
+    st.stop()
+
+# --- Jika Berhasil, Tampilkan Soal ---
+st.success("Selamat mengerjakan!")
+# Ambil soal dari sheet yang sama menggunakan conn.read(worksheet="Bank Soal")
+
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Tes CAT Online", layout="wide")
 
@@ -181,18 +215,3 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
