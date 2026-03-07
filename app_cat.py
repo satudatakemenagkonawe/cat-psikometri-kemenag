@@ -15,14 +15,19 @@ except Exception as e:
 # --- 2. FUNGSI AMBIL KODE DARI GOOGLE SHEET ---
 def get_access_code():
     try:
-        # Menambahkan ttl=0 agar Streamlit tidak pakai data lama (selalu ambil yang terbaru dari Sheet)
+        # Gunakan usecols untuk memastikan hanya membaca kolom yang diperlukan
         df = conn.read(worksheet="Settings", ttl=0) 
+        
+        # Membersihkan spasi di nama kolom (untuk berjaga-jaga)
+        df.columns = df.columns.str.strip()
+        
         # Mencari baris 'access_code'
         code_row = df[df['parameter'] == 'access_code']
         if not code_row.empty:
             return str(code_row['value'].values[0])
         return None
     except Exception as e:
+        # Pesan ini akan muncul jika link di secrets salah atau sheet tidak di-share
         st.error(f"Koneksi Sheet Bermasalah: {e}")
         return None
         
@@ -224,6 +229,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
