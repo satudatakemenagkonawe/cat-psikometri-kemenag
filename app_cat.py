@@ -130,7 +130,7 @@ if not st.session_state.identitas_siap:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap")
             nip = st.text_input("Nomor Peserta")
-            if st.form_submit_button("Mulai Tes"):
+            if st.form_submit_button("Masuk ke Ruang Tes"):
                 if nama and nip and st.session_state.bank_soal:
                     st.session_state.nama, st.session_state.nip = nama, nip
                     st.session_state.identitas_siap = True
@@ -144,7 +144,7 @@ else:
     
     col_t, col_p = st.columns([3, 1])
     col_t.title("🛡️ CAT Online")
-    col_p.markdown(f"<div style='text-align:center; border-left: 3px solid #2E7D32; padding-left: 10px;'><b>👤 {st.session_state.nama}</b><br><span style='font-size:40px; color:{'blue' if rem < 10 else '#2E7D32'};'>⏱️ {rem} s</span></div>", unsafe_allow_html=True)
+    col_p.markdown(f"<div style='text-align:left; border-left: 3px solid #ffffff; padding-left: 10px;'><b>👤 {st.session_state.nama}</b><br><span style='font-size:40px; color:{'blue' if rem < 10 else '#ffffff'};'>⏱️ {rem} s</span></div>", unsafe_allow_html=True)
     
     st.progress(st.session_state.index_soal / len(st.session_state.bank_soal))
 
@@ -190,6 +190,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
