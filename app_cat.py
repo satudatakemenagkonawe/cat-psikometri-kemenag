@@ -1,9 +1,29 @@
+# ==========================================
+# 1. IMPORT PERPUSTAKAAN UTAMA (WAJIB)
+# ==========================================
 import streamlit as st
-import pandas as pd              # Tambahkan ini untuk tabel
-from streamlit_gsheets import GSheetsConnection # Tambahkan ini untuk koneksi Sheets
-import numpy as np               # Boleh tetap ada jika sudah dipakai di kode lama
+import pandas as pd
+import numpy as np
 import requests
 import time
+import datetime
+
+# ==========================================
+# 2. IMPORT KONEKSI GOOGLE SHEETS
+# ==========================================
+from streamlit_gsheets import GSheetsConnection
+
+# ==========================================
+# 3. KONFIGURASI HALAMAN (OPSIONAL TAPI BAGUS)
+# ==========================================
+st.set_page_config(
+    page_title="CAT Online Psikometri",
+    page_icon="📝",
+    layout="centered"
+)
+
+# Membuat koneksi ke Google Sheet
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 # Membaca data dari sheet 'Settings'
 def get_access_code():
@@ -210,5 +230,6 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
