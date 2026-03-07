@@ -66,17 +66,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- CARA PENGGUNAAN DI STREAMLIT ---
-
-# Membungkus konten dalam Glass Effect
-st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-st.subheader("Simulasi CAT - Ruang Tes")
-st.write("Klik tombol di bawah untuk masuk ke ruang ujian.")
-
-# Tombol yang sudah berubah warnanya
-st.button("Masuk ke Ruang Tes")
-st.markdown('</div>', unsafe_allow_html=True)
-
 # --- 2. INISIALISASI STATE ---
 if 'identitas_siap' not in st.session_state:
     st.session_state.identitas_siap = False
@@ -190,6 +179,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
