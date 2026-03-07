@@ -5,9 +5,6 @@ import numpy as np               # Boleh tetap ada jika sudah dipakai di kode la
 import requests
 import time
 
-# Membuat koneksi ke Google Sheet
-conn = st.connection("gsheets", type=GSheetsConnection)
-
 # Membaca data dari sheet 'Settings'
 def get_access_code():
     # Ganti URL_SHEET dengan link Google Sheet kamu yang sudah di-share
@@ -213,4 +210,5 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
