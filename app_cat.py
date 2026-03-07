@@ -22,6 +22,13 @@ st.set_page_config(
     layout="centered"
 )
 
+# Coba ganti bagian ini sementara untuk tes
+try:
+    df = conn.read(worksheet="Settings")
+    st.write("Koneksi Berhasil!")
+except Exception as e:
+    st.error(f"Gagal konek karena: {e}")
+
 # Membuat koneksi ke Google Sheet
 conn = st.connection("gsheets", type=GSheetsConnection)
 
@@ -230,6 +237,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
