@@ -15,15 +15,17 @@ except Exception as e:
 # --- 2. FUNGSI AMBIL KODE DARI GOOGLE SHEET ---
 def get_access_code():
     try:
-        # Membaca sheet bernama 'Settings'
-        df = conn.read(worksheet="Settings")
-        # Mengambil nilai dari kolom 'value' di mana 'parameter' adalah 'access_code'
-        code = df.loc[df['parameter'] == 'access_code', 'value'].values[0]
-        return str(code)
-    except Exception as e:
-        st.error(f"Gagal konek karena: {e}")
+        # Menambahkan ttl=0 agar Streamlit tidak pakai data lama (selalu ambil yang terbaru dari Sheet)
+        df = conn.read(worksheet="Settings", ttl=0) 
+        # Mencari baris 'access_code'
+        code_row = df[df['parameter'] == 'access_code']
+        if not code_row.empty:
+            return str(code_row['value'].values[0])
         return None
-
+    except Exception as e:
+        st.error(f"Koneksi Sheet Bermasalah: {e}")
+        return None
+        
 # --- 3. LOGIKA GATEKEEPER ---
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
@@ -222,6 +224,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
