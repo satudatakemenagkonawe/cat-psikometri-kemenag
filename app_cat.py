@@ -9,7 +9,7 @@ import time
 
 st.set_page_config(page_title="CAT Kemenag Konawe", layout="wide")
 
-API_URL = "YOUR_GOOGLE_SCRIPT_URL"
+API_URL = "https://script.google.com/macros/s/AKfycbwyeUncpG9ql9S83GRlnu7zJCY649wB4t71L1w5KD3O8M1itYhiEUo9vRkgP8DqKuD8aw/exec"
 
 # =============================
 # SESSION SECURITY
@@ -315,3 +315,4 @@ if password=="admin123":
     except:
 
         st.sidebar.warning("Tidak bisa mengambil data")
+
