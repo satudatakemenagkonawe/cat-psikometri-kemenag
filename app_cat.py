@@ -14,15 +14,9 @@ API_URL = "https://script.google.com/macros/s/AKfycbwyeUncpG9ql9S83GRlnu7zJCY649
 # =============================
 # SESSION SECURITY
 # =============================
-
-if "session_id" not in st.session_state:
-    st.session_state.session_id = str(uuid.uuid4())
-
-if "tab_lock" not in st.session_state:
-    st.session_state.tab_lock = True
-else:
-    st.error("Tes sudah terbuka di tab lain.")
-    st.stop()
+import uuid
+if "browser_id" not in st.session_state:
+    st.session_state.browser_id = str(uuid.uuid4())
 
 # =============================
 # API FUNCTIONS
@@ -341,5 +335,6 @@ if password=="admin123":
     except:
 
         st.sidebar.warning("Tidak bisa mengambil data")
+
 
 
