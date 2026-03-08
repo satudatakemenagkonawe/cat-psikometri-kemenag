@@ -6,7 +6,7 @@ import time
 import datetime
 from streamlit_gsheets import GSheetsConnection
 
-# --- 1. INISIALISASI KONEKSI (WAJIB ADA) ---
+# --- 1. INISIALISASI KONEKSI ---
 try:
     conn = st.connection("gsheets", type=GSheetsConnection)
 except Exception as e:
@@ -15,19 +15,21 @@ except Exception as e:
 # --- 2. FUNGSI AMBIL KODE DARI GOOGLE SHEET ---
 def get_access_code():
     try:
-        # Gunakan usecols untuk memastikan hanya membaca kolom yang diperlukan
-        df = conn.read(worksheet="Settings", ttl=0) 
+        # Perbaikan: Hapus ttl=0 sementara untuk memastikan koneksi stabil
+        df = conn.read(worksheet="Settings") 
         
-        # Membersihkan spasi di nama kolom (untuk berjaga-jaga)
-        df.columns = df.columns.str.strip()
+        # Tambahan pengaman: Memastikan tidak ada spasi di nama kolom
+        df.columns = df.columns.str.strip().str.lower()
         
         # Mencari baris 'access_code'
+        # Pastikan di Sheet kolomnya bernama 'parameter' dan 'value'
         code_row = df[df['parameter'] == 'access_code']
+        
         if not code_row.empty:
             return str(code_row['value'].values[0])
         return None
     except Exception as e:
-        # Pesan ini akan muncul jika link di secrets salah atau sheet tidak di-share
+        # Jika error 400 berlanjut, pesan ini akan menangkap detailnya
         st.error(f"Koneksi Sheet Bermasalah: {e}")
         return None
         
@@ -45,12 +47,13 @@ if not st.session_state['authenticated']:
     input_user = st.text_input("Kode Akses:", type="password")
     
     if st.button("Masuk"):
-        if VALID_CODE and input_user == VALID_CODE:
+        # Tambahkan pembersihan spasi pada input user agar lebih akurat
+        if VALID_CODE and input_user.strip() == VALID_CODE.strip():
             st.session_state['authenticated'] = True
             st.rerun()
         else:
             st.error("Kode salah atau tidak dapat terhubung ke server.")
-    st.stop() # Berhenti di sini jika belum login
+    st.stop() 
 
 # --- KODE UJIAN KAMU DI BAWAH INI ---
 st.success("Koneksi Berhasil! Selamat mengerjakan.")
@@ -229,6 +232,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
