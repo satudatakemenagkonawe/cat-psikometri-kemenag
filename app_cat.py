@@ -149,31 +149,57 @@ if "start_time" not in st.session_state:
 # LOGIN
 # =============================
 
-if not st.session_state.login:
+def cek_peserta(nip):
+    
+    try:
+        r = requests.get(API_URL + "?action=peserta")
+        df = pd.DataFrame(r.json())
+        
+        peserta = df[df["nip"] == nip]
+        
+        if peserta.empty:
+            return "TIDAK TERDAFTAR"
+        
+        if peserta.iloc[0]["status"] == "SELESAI":
+            return "SUDAH TES"
+        
+        return "VALID"
+    
+    except:
+        return "ERROR"
 
-    st.title("🛡️ CAT Kemenag Konawe")
+# =============================
+# LOGIN YANG BENAR
+# =============================
 
-    nama=st.text_input("Nama")
-    nip=st.text_input("Nomor Peserta")
+st.title("🛡️ CAT Kemenag Konawe")
 
-    if st.button("Mulai Tes"):
+nama = st.text_input("Nama")
+nip = st.text_input("Nomor Peserta")
 
-        if nama and nip:
+if st.button("Mulai Tes"):
+    
+    status = cek_peserta(nip)
+    
+    if status == "TIDAK TERDAFTAR":
+        st.error("Nomor peserta tidak terdaftar.")
+    
+    elif status == "SUDAH TES":
+        st.warning("Peserta ini sudah mengikuti ujian.")
+    
+    elif status == "VALID":
+        
+        st.session_state.nama = nama
+        st.session_state.nip = nip
+        st.session_state.login = True
+        st.session_state.start_time = datetime.datetime.utcnow().timestamp()
 
-            st.session_state.nama=nama
-            st.session_state.nip=nip
-            st.session_state.login=True
-            st.session_state.start_time=datetime.datetime.utcnow().timestamp()
+        api_register(nama,nip,st.session_state.session_id)
 
-            api_register(nama,nip,st.session_state.session_id)
-
-            st.rerun()
-
-        else:
-
-            st.warning("Isi data")
-
-    st.stop()
+        st.rerun()
+    
+    else:
+        st.error("Server tidak dapat dihubungi.")
 
 # =============================
 # TIMER SERVER
@@ -315,4 +341,5 @@ if password=="admin123":
     except:
 
         st.sidebar.warning("Tidak bisa mengambil data")
+
 
