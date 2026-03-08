@@ -19,10 +19,10 @@ def get_access_code():
 
         df.columns = df.columns.str.strip().str.lower()
 
-        code_row = df[df["A1"].str.strip() == "access_code"]
+        code_row = df[df["parameter"].str.strip() == "access_code"]
 
         if not code_row.empty:
-            return str(code_row["B1"].iloc[0]).strip()
+            return str(code_row["value"].iloc[0]).strip()
 
         return None
 
@@ -229,6 +229,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
