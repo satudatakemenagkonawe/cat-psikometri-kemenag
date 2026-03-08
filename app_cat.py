@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import requests
+from streamlit_gsheets import GSheetsConnection
 import time
 import datetime
-from streamlit_gsheets import GSheetsConnection
 
 # --- 1. INISIALISASI KONEKSI ---
 try:
@@ -232,6 +232,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
