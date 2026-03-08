@@ -15,21 +15,18 @@ except Exception as e:
 # --- 2. FUNGSI AMBIL KODE DARI GOOGLE SHEET ---
 def get_access_code():
     try:
-        # Perbaikan: Hapus ttl=0 sementara untuk memastikan koneksi stabil
-        df = conn.read(worksheet="Settings") 
-        
-        # Tambahan pengaman: Memastikan tidak ada spasi di nama kolom
+        df = conn.read(worksheet="Settings")
+
         df.columns = df.columns.str.strip().str.lower()
-        
-        # Mencari baris 'access_code'
-        # Pastikan di Sheet kolomnya bernama 'parameter' dan 'value'
-        code_row = df[df['parameter'] == 'access_code']
-        
+
+        code_row = df[df["parameter"].str.strip() == "access_code"]
+
         if not code_row.empty:
-            return str(code_row['value'].values[0])
+            return str(code_row["value"].iloc[0]).strip()
+
         return None
+
     except Exception as e:
-        # Jika error 400 berlanjut, pesan ini akan menangkap detailnya
         st.error(f"Koneksi Sheet Bermasalah: {e}")
         return None
         
@@ -232,6 +229,7 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
 
 
