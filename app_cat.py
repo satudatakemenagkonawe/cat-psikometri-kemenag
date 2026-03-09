@@ -80,53 +80,45 @@ def information(theta,a,b,c):
 # SELECT ITEM
 # =====================
 
-def select_items(theta,bank,used):
-
-    best=None
-    max_info=-1
-
-    for items in bank:
-
-        if items["id"] in used:
+def select_items(theta, bank, used):
+    best = None
+    max_info = -1
+    for item in bank: # Gunakan 'item', bukan 'items'
+        if item["id"] in used:
             continue
-
-        info=information(theta,items["a"],items["b"],items["c"])
-
-        if info>max_info:
-
-            max_info=info
-            best=items
-
+        info = information(theta, item["a"], item["b"], item["c"])
+        if info > max_info:
+            max_info = info
+            best = item
     return best
-
-
 # =====================
 # UPDATE THETA
 # =====================
 
 def update_theta(theta, responses, items):
-    if items is None or len(items) == 0:
-        return theta # Kembalikan nilai awal jika data kosong
-    # ... sisa kode lainnya ...
-
+    if not items or len(responses) == 0:
+        return theta
+    
+    # Logika sederhana: Jika benar naik 0.5, jika salah turun 0.5
+    # Anda bisa mengganti ini dengan MLE atau EAP yang lebih kompleks
+    last_response = responses[-1]
+    if last_response == 1:
+        new_theta = theta + 0.5
+    else:
+        new_theta = theta - 0.5
+        
+    return np.clip(new_theta, -3, 3) # Batasi theta agar tidak ekstrim
 # =====================
 # STANDARD ERROR
 # =====================
 
-def se(theta,items):
-
-    info=0
-
-    for items in items:
-
-        info+=information(theta,items["a"],items["b"],items["c"])
-
-    if info==0:
+def se(theta, items_list): # Gunakan nama yang berbeda
+    info = 0
+    for item in items_list:
+        info += information(theta, item["a"], item["b"], item["c"])
+    if info == 0:
         return 999
-
     return 1/math.sqrt(info)
-
-
 # =====================
 # SCORE
 # =====================
@@ -152,7 +144,7 @@ if "session_id" not in st.session_state:
 
     st.session_state.responses=[]
 
-    st.session_state.items_history=[]
+    st.session_state.items=[]
 
     st.session_state.start=time.time()
 
@@ -213,16 +205,16 @@ else:
 
 
     # memastikan session selalu valid
-    if "items" not in st.session_state or not isinstance(st.session_state.items_history, list):
-        st.session_state.items_history = []
+    if "items" not in st.session_state or not isinstance(st.session_state.items, list):
+        st.session_state.items = []
 
-    used = [x["id"] for x in st.session_state.items_history if isinstance(x, dict) and "id" in x]
+    used = [x["id"] for x in st.session_state.items if isinstance(x, dict) and "id" in x]
     soal=select_items(
         st.session_state.theta,
         bank,
         used
     )
-    st.write(type(st.session_state.items_history))
+    st.write(type(st.session_state.items))
     st.subheader("Soal "+str(st.session_state.index+1))
 
     st.write(soal["teks"])
@@ -258,14 +250,3 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
-
-
-
-
-
-
-
-
-
-
-
