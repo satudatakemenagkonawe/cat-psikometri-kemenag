@@ -13,6 +13,27 @@ MAX_ITEMS=30
 SE_THRESHOLD=0.30
 TIME_LIMIT=60
 
+# ======================================
+# SESSION INITIALIZER (WAJIB UNTUK CAT)
+# ======================================
+
+def init_session():
+
+    defaults = {
+        "theta": 0,
+        "se": 999,
+        "items": [],
+        "answers": {},
+        "start_time": None,
+        "finished": False
+    }
+
+    for k,v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+
+init_session()
+
 # =====================
 # LOAD BANK SOAL
 # =====================
@@ -214,8 +235,11 @@ else:
         st.stop()
 
 
-    used=[x["id"] for x in st.session_state.items]
+    # memastikan session selalu valid
+    if "items" not in st.session_state or not isinstance(st.session_state.items, list):
+        st.session_state.items = []
 
+    used = [x["id"] for x in st.session_state.items if isinstance(x, dict) and "id" in x]
     soal=select_item(
         st.session_state.theta,
         bank,
@@ -254,4 +278,5 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
