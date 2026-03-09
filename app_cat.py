@@ -40,10 +40,16 @@ def load_session():
 
 def save_session(data):
 
+    safe_data = json.loads(json.dumps(data, default=str))
+
     with open(SESSION_FILE,"w") as f:
+        json.dump(safe_data,f)
 
-        json.dump(data,f)
+    saved = load_session()
 
+    if saved:
+        for k,v in saved.items():
+            st.session_state[k] = v
 
 # ================================
 # AMBIL BANK SOAL
@@ -274,8 +280,16 @@ if not st.session_state.identitas_siap:
 
                 st.session_state.start_server=time.time()
 
-                save_session(st.session_state)
-
+                save_session({
+                    "identitas_siap": st.session_state.identitas_siap,
+                    "nama": st.session_state.nama,
+                    "nip": st.session_state.nip,
+                    "theta": float(st.session_state.theta),
+                    "index_soal": int(st.session_state.index_soal),
+                    "responses": st.session_state.responses,
+                    "soal_selesai": st.session_state.soal_selesai,
+                    "start_server": float(st.session_state.start_server)
+                })
                 st.rerun()
 
 
@@ -391,3 +405,4 @@ else:
             save_session(st.session_state)
 
             st.rerun()
+
