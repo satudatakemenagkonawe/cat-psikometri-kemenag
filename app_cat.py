@@ -104,34 +104,10 @@ def select_items(theta,bank,used):
 # UPDATE THETA
 # =====================
 
-def update_theta(theta,responses,items):
-
-    num=0
-    den=0
-
-    for i in range(len(responses)):
-
-        iitems =items[i]
-
-        a=items["a"]
-        b=items["b"]
-        c=items["c"]
-
-        u=responses[i]
-
-        p=prob(theta,a,b,c)
-
-        q=1-p
-
-        num+=a*(u-p)
-        den+=a*a*p*q
-
-    if den!=0:
-
-        theta=theta+(num/den)
-
-    return theta
-
+def update_theta(theta, responses, items):
+    if items is None or len(items) == 0:
+        return theta # Kembalikan nilai awal jika data kosong
+    # ... sisa kode lainnya ...
 
 # =====================
 # STANDARD ERROR
@@ -282,6 +258,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
