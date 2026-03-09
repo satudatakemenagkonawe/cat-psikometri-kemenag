@@ -22,13 +22,13 @@ def init_session():
     defaults = {
         "theta": 0,
         "se": 999,
-        "administered_items": [],
+        "butir": [],
         "answers": {},
         "start_time": None,
         "finished": False
     }
 
-    for k,v in defaults.administered_items():
+    for k,v in defaults.butir():
         if k not in st.session_state:
             st.session_state[k] = v
     init_session()
@@ -104,14 +104,14 @@ def select_item(theta,bank,used):
 # UPDATE THETA
 # =====================
 
-def update_theta(theta,responses,administered_items):
+def update_theta(theta,responses,butir):
 
     num=0
     den=0
 
     for i in range(len(responses)):
 
-        item=administered_items[i]
+        item=butir[i]
 
         a=item["a"]
         b=item["b"]
@@ -137,11 +137,11 @@ def update_theta(theta,responses,administered_items):
 # STANDARD ERROR
 # =====================
 
-def se(theta,administered_items):
+def se(theta,butir):
 
     info=0
 
-    for item in administered_items:
+    for item in butir:
 
         info+=information(theta,item["a"],item["b"],item["c"])
 
@@ -225,7 +225,7 @@ else:
         st.rerun()
 
 
-    if st.session_state.index>=MAX_ADMINISTERED_ITEMS:
+    if st.session_state.index>=MAX_BUTIR:
 
         final=score(st.session_state.theta)
 
@@ -237,7 +237,7 @@ else:
 
 
     # memastikan session selalu valid
-    if "administered_items" not in st.session_state or not isinstance(st.session_state.item_history, list):
+    if "butir" not in st.session_state or not isinstance(st.session_state.item_history, list):
         st.session_state.item_history = []
 
     used = [x["id"] for x in st.session_state.item_history if isinstance(x, dict) and "id" in x]
