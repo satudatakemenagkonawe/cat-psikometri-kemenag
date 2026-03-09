@@ -267,6 +267,9 @@ else:
         st.session_state.responses.append(skor)
 
         st.session_state.items.append(soal)
+        
+        st.write(type(st.session_state.items)) # Cek tipenya
+        st.write(st.session_state.items)       # Cek isinya
 
         st.session_state.theta=update_theta(
             st.session_state.theta,
@@ -279,6 +282,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
