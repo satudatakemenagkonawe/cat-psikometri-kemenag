@@ -175,7 +175,7 @@ if "session_id" not in st.session_state:
 
     st.session_state.responses=[]
 
-    st.session_state.items=[]
+    st.session_state.item_history=[]
 
     st.session_state.start=time.time()
 
@@ -236,16 +236,16 @@ else:
 
 
     # memastikan session selalu valid
-    if "items" not in st.session_state or not isinstance(st.session_state.items, list):
-        st.session_state.items = []
+    if "items" not in st.session_state or not isinstance(st.session_state.item_history, list):
+        st.session_state.item_history = []
 
-    used = [x["id"] for x in st.session_state.items if isinstance(x, dict) and "id" in x]
+    used = [x["id"] for x in st.session_state.item_history if isinstance(x, dict) and "id" in x]
     soal=select_item(
         st.session_state.theta,
         bank,
         used
     )
-
+    st.write(type(st.session_state.item_history))
     st.subheader("Soal "+str(st.session_state.index+1))
 
     st.write(soal["teks"])
@@ -270,7 +270,7 @@ else:
         st.session_state.theta=update_theta(
             st.session_state.theta,
             st.session_state.responses,
-            st.session_state.items
+            st.session_state.item_history
         )
 
         st.session_state.index+=1
@@ -278,5 +278,6 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
