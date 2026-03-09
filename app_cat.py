@@ -7,7 +7,7 @@ import uuid
 
 st.set_page_config(page_title="CAT Online",layout="wide")
 
-API_URL="PASTE_URL_WEBAPP_ANDA"
+API_URL="https://script.google.com/macros/s/AKfycbwtdEei5DFD95dlEvegxqS1oorA7Nr1H44k2s6SqysuvomcSH119cbV04gvt40h5A_qrA/exec"
 
 MAX_ITEMS=30
 SE_THRESHOLD=0.30
@@ -254,3 +254,4 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
