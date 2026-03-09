@@ -225,7 +225,7 @@ else:
         st.rerun()
 
 
-    if st.session_state.index>=MAX_ITEM:
+    if st.session_state.index>=MAX_THETA:
 
         final=score(st.session_state.theta)
 
@@ -279,6 +279,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
