@@ -5,248 +5,156 @@ import math
 import time
 import uuid
 
-st.set_page_config(page_title="CAT Online",layout="wide")
+st.set_page_config(page_title="CAT Online", layout="wide")
 
-API_URL="https://script.google.com/macros/s/AKfycbwtdEei5DFD95dlEvegxqS1oorA7Nr1H44k2s6SqysuvomcSH119cbV04gvt40h5A_qrA/exec"
+API_URL = "https://script.google.com/macros/s/AKfycbwtdEei5DFD95dlEvegxqS1oorA7Nr1H44k2s6SqysuvomcSH119cbV04gvt40h5A_qrA/exec"
 
-MAX_THETA=30
-SE_THRESHOLD=0.30
-TIME_LIMIT=60
+MAX_SOAL = 30 # Batas jumlah soal
+TIME_LIMIT = 60
 
 # ======================================
-# SESSION INITIALIZER (WAJIB UNTUK CAT)
+# 1. CENTRALIZED SESSION INITIALIZER
 # ======================================
+# Taruh ini di paling atas agar variabel selalu ada sebelum dipanggil baris lain
+if "initialized" not in st.session_state:
+    st.session_state.theta = 0.0
+    st.session_state.responses = []
+    st.session_state.items_history = [] # Gunakan satu nama yang konsisten
+    st.session_state.index = 0
+    st.session_state.session_id = str(uuid.uuid4())
+    st.session_state.start_time = time.time()
+    st.session_state.initialized = True
 
-if 'items' not in st.session_state:
-        st.session_state.items = [] # atau muat data Anda di sini
-def init_session():
-
-    defaults = {
-        "theta": 0,
-        "se": 999,
-        "items": [],
-        "answers": {},
-        "start_time": None,
-        "finished": False
-    }
-
-    for k,v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
-    init_session()
-    
 # =====================
-# LOAD BANK SOAL
+# 2. LOAD BANK SOAL
 # =====================
-
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=300)
 def load_bank():
-
-    r=requests.get(API_URL)
-
-    data=r.json()
-
-    for i in data:
-
-        i["a"]=float(i["a"])
-        i["b"]=float(i["b"])
-        i["c"]=float(i["c"])
-
-    return data
-
+    try:
+        r = requests.get(API_URL)
+        data = r.json()
+        for i in data:
+            i["a"] = float(i["a"])
+            i["b"] = float(i["b"])
+            i["c"] = float(i["c"])
+        return data
+    except Exception as e:
+        st.error(f"Gagal memuat bank soal: {e}")
+        return []
 
 # =====================
-# IRT FUNCTIONS
+# 3. IRT & CAT LOGIC
 # =====================
+def prob(theta, a, b, c):
+    return c + (1 - c) / (1 + math.exp(-a * (theta - b)))
 
-def prob(theta,a,b,c):
+def information(theta, a, b, c):
+    p = prob(theta, a, b, c)
+    q = 1 - p
+    if p <= 1e-9 or q <= 1e-9: return 0
+    return (a**2 * (p - c)**2) / ((1 - c)**2 * p * q)
 
-    return c+(1-c)/(1+math.exp(-a*(theta-b)))
-
-
-def information(theta,a,b,c):
-
-    p=prob(theta,a,b,c)
-
-    q=1-p
-
-    if p<=0 or q<=0:
-        return 0
-
-    return (a*a*(p-c)*(p-c))/((1-c)*(1-c)*p*q)
-
-
-# =====================
-# SELECT ITEM
-# =====================
-
-def select_items(theta, bank, used):
-    best = None
+def select_next_item(theta, bank, used_ids):
+    best_item = None
     max_info = -1
-    for item in bank: # Gunakan 'item', bukan 'items'
-        if item["id"] in used:
+    for item in bank:
+        if item["id"] in used_ids:
             continue
         info = information(theta, item["a"], item["b"], item["c"])
         if info > max_info:
             max_info = info
-            best = item
-    return best
-# =====================
-# UPDATE THETA
-# =====================
+            best_item = item
+    return best_item
 
-def update_theta(theta, responses, items):
-    if not items or len(responses) == 0:
-        return theta
-    
-    # Logika sederhana: Jika benar naik 0.5, jika salah turun 0.5
-    # Anda bisa mengganti ini dengan MLE atau EAP yang lebih kompleks
-    last_response = responses[-1]
-    if last_response == 1:
-        new_theta = theta + 0.5
-    else:
-        new_theta = theta - 0.5
-        
-    return np.clip(new_theta, -3, 3) # Batasi theta agar tidak ekstrim
-# =====================
-# STANDARD ERROR
-# =====================
+def update_theta_simple(theta, responses):
+    # Logika sederhana: naik/turun berdasarkan jawaban terakhir
+    # Ganti dengan MLE jika Anda sudah memiliki rumusnya
+    if not responses: return theta
+    last_res = responses[-1]
+    step = 0.4 if last_res == 1 else -0.4
+    return np.clip(theta + step, -3.0, 3.0)
 
-def se(theta, items_list): # Gunakan nama yang berbeda
-    info = 0
-    for item in items_list:
-        info += information(theta, item["a"], item["b"], item["c"])
-    if info == 0:
-        return 999
-    return 1/math.sqrt(info)
-# =====================
-# SCORE
-# =====================
-
-def score(theta):
-
-    return round(((np.clip(theta,-3,3)+3)/6)*100,2)
-
+def get_score(theta):
+    return round(((np.clip(theta, -3, 3) + 3) / 6) * 100, 2)
 
 # =====================
-# INIT
+# 4. ALUR APLIKASI
 # =====================
+bank = load_bank()
 
-bank=load_bank()
-
-if "session_id" not in st.session_state:
-
-    st.session_state.session_id=str(uuid.uuid4())
-
-    st.session_state.theta=0
-
-    st.session_state.index=0
-
-    st.session_state.responses=[]
-
-    st.session_state.items=[]
-
-    st.session_state.start=time.time()
-
-
-# =====================
-# LOGIN
-# =====================
-
+# LOGIN SCREEN
 if "nama" not in st.session_state:
-
     st.title("Login CAT")
-
-    nama=st.text_input("Nama")
-
-    nip=st.text_input("Nomor Peserta")
-
+    nama = st.text_input("Nama")
+    nip = st.text_input("Nomor Peserta")
     if st.button("Mulai Tes"):
+        if nama and nip:
+            st.session_state.nama = nama
+            st.session_state.nip = nip
+            st.session_state.start_time = time.time()
+            st.rerun()
+        else:
+            st.warning("Isi nama dan nomor peserta!")
+    st.stop()
 
-        st.session_state.nama=nama
-        st.session_state.nip=nip
+# TEST SCREEN
+elapsed = time.time() - st.session_state.start_time
+sisa_waktu = max(0, TIME_LIMIT - int(elapsed))
 
+if st.session_state.index >= MAX_SOAL or sisa_waktu <= 0:
+    st.success("Tes Selesai!")
+    final_score = get_score(st.session_state.theta)
+    st.metric("Skor Akhir", final_score)
+    # Tampilkan tombol restart jika perlu
+    if st.button("Ulangi Tes"):
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
         st.rerun()
+    st.stop()
 
+# Ambil ID yang sudah digunakan
+used_ids = [x["id"] for x in st.session_state.items_history]
+soal_saat_ini = select_next_item(st.session_state.theta, bank, used_ids)
 
-# =====================
-# TES
-# =====================
-
-else:
-
-    elapsed=time.time()-st.session_state.start
-
-    sisa=max(0,TIME_LIMIT-int(elapsed))
-
+if soal_saat_ini:
     st.title("CAT Online")
+    cols = st.columns(2)
+    cols[0].write(f"**Peserta:** {st.session_state.nama}")
+    cols[1].write(f"**Sisa Waktu:** {sisa_waktu} detik")
+    
+    st.divider()
+    st.subheader(f"Soal ke-{st.session_state.index + 1}")
+    st.write(soal_saat_ini["teks"])
 
-    st.write("Peserta:",st.session_state.nama)
-
-    st.write("Waktu:",sisa)
-
-    if sisa<=0:
-
-        st.session_state.index+=1
-        st.session_state.start=time.time()
-
-        st.rerun()
-
-
-    if st.session_state.index>=MAX_THETA:
-
-        final=score(st.session_state.theta)
-
-        st.success("Tes selesai")
-
-        st.metric("Skor",final)
-
-        st.stop()
-
-
-    # memastikan session selalu valid
-    if "items" not in st.session_state or not isinstance(st.session_state.items, list):
-        st.session_state.items = []
-
-    used = [x["id"] for x in st.session_state.items if isinstance(x, dict) and "id" in x]
-    soal=select_items(
-        st.session_state.theta,
-        bank,
-        used
-    )
-    st.write(type(st.session_state.items))
-    st.subheader("Soal "+str(st.session_state.index+1))
-
-    st.write(soal["teks"])
-
-    opsi=[
-        "A. "+soal["opsi_A"],
-        "B. "+soal["opsi_B"],
-        "C. "+soal["opsi_C"],
-        "D. "+soal["opsi_D"]
+    opsi = [
+        f"A. {soal_saat_ini['opsi_A']}",
+        f"B. {soal_saat_ini['opsi_B']}",
+        f"C. {soal_saat_ini['opsi_C']}",
+        f"D. {soal_saat_ini['opsi_D']}"
     ]
 
-    pilih=st.radio("Jawaban",opsi,index=None)
+    pilih = st.radio("Pilih Jawaban:", opsi, index=None)
 
-    if st.button("Simpan"):
-
-        skor=1 if pilih.startswith(soal["kunci"]) else 0
-
-        st.session_state.responses.append(skor)
-
-        st.session_state.items.append(soal)
-        
-        st.write(type(st.session_state.items)) # Cek tipenya
-        st.write(st.session_state.items)       # Cek isinya
-
-        st.session_state.theta=update_theta(
-            st.session_state.theta,
-            st.session_state.responses,
-            st.session_state.items
-        )
-
-        st.session_state.index+=1
-
-        st.session_state.start=time.time()
-
-        st.rerun()
+    if st.button("Simpan & Lanjut"):
+        if pilih:
+            # Hitung skor (cek apakah huruf awal pilihan sesuai kunci)
+            is_correct = 1 if pilih.startswith(soal_saat_ini["kunci"]) else 0
+            
+            # Simpan history
+            st.session_state.responses.append(is_correct)
+            st.session_state.items_history.append(soal_saat_ini)
+            
+            # Update kemampuan (theta)
+            st.session_state.theta = update_theta_simple(
+                st.session_state.theta, 
+                st.session_state.responses
+            )
+            
+            # Progres ke soal berikutnya
+            st.session_state.index += 1
+            st.session_state.start_time = time.time() # Reset timer per soal jika perlu
+            st.rerun()
+        else:
+            st.error("Pilih jawaban terlebih dahulu!")
+else:
+    st.error("Bank soal habis atau tidak ditemukan.")
