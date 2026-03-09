@@ -31,10 +31,9 @@ def init_session():
     for k,v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+    init_session()
     if "item_history" not in st.session_state:
-    st.session_state.item_history = []
-
-init_session()
+        st.session_state.item_history = []
 
 # =====================
 # LOAD BANK SOAL
@@ -280,6 +279,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
