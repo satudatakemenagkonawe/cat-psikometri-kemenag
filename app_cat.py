@@ -271,7 +271,7 @@ else:
         st.session_state.theta=update_theta(
             st.session_state.theta,
             st.session_state.responses,
-            st.session_state.item_history_history
+            st.session_state.item_history
         )
 
         st.session_state.index+=1
@@ -279,6 +279,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
