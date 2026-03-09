@@ -1,160 +1,181 @@
 import streamlit as st
-import requests
 import numpy as np
-import math
+import requests
 import time
-import uuid
 
-st.set_page_config(page_title="CAT Online", layout="wide")
+# --- 1. KONFIGURASI HALAMAN ---
+st.set_page_config(page_title="Tes CAT Online", layout="wide")
 
-API_URL = "https://script.google.com/macros/s/AKfycbwtdEei5DFD95dlEvegxqS1oorA7Nr1H44k2s6SqysuvomcSH119cbV04gvt40h5A_qrA/exec"
+import streamlit as st
 
-MAX_SOAL = 30 # Batas jumlah soal
-TIME_LIMIT = 60
+# --- CUSTOM CSS (Tampilan Profesional & Glassmorphism) ---
+st.markdown("""
+    <style>
+    /* 1. Mengatur Latar Belakang Utama */
+    .stApp {
+        background-color: #5a5c57;
+    }
 
-# ======================================
-# 1. CENTRALIZED SESSION INITIALIZER
-# ======================================
-# Taruh ini di paling atas agar variabel selalu ada sebelum dipanggil baris lain
-if "initialized" not in st.session_state:
+    /* 2. Efek Glassmorphism (Kaca Buram) untuk Layar CAT */
+    /* Gunakan kontainer ini untuk membungkus elemen form/text */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        margin-bottom: 20px;
+    }
+
+    /* 3. Gaya Tombol Putih dengan Bayangan Kuning (Persis Gambar Pertama) */
+    .stButton>button {
+        width: 100%;
+        border-radius: 20px;
+        background-color: #1a4d2e;    /* Warna Teks Hijau Tua */
+        color: #ffffff;               /* Warna Putih */
+        font-weight: bold;
+        font-size: 20px;
+        height: 3.5em;
+        border: none;
+        
+        /* Efek Shadow Kuning 3D */
+        box-shadow: 0px 8px 0px #f1c40f; 
+        transition: all 0.1s ease;
+    }
+
+    /* Efek Hover (Saat kursor di atas tombol) */
+    .stButton>button:hover {
+        background-color: #1a4d2e;
+        color: #1B5E20;
+        box-shadow: 0px 8px 0px #f1c40f;
+        border: none;
+    }
+
+    /* Efek Klik (Tombol Membal ke Bawah) */
+    .stButton>button:active {
+        box-shadow: 0px 2px 0px #f1c40f !important;
+        transform: translateY(6px);
+    }
+
+    /* Penyesuaian warna teks standar agar putih (terbaca di bg gelap) */
+    h1, h2, h3, p, label, .stMarkdown {
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- 2. INISIALISASI STATE ---
+if 'identitas_siap' not in st.session_state:
+    st.session_state.identitas_siap = False
+if 'index_soal' not in st.session_state:
+    st.session_state.index_soal = 0
+if 'theta' not in st.session_state:
     st.session_state.theta = 0.0
-    st.session_state.responses = []
-    st.session_state.items_history = [] # Gunakan satu nama yang konsisten
-    st.session_state.index = 0
-    st.session_state.session_id = str(uuid.uuid4())
-    st.session_state.start_time = time.time()
-    st.session_state.initialized = True
+if 'soal_selesai' not in st.session_state:
+    st.session_state.soal_selesai = []
+if 'total_info' not in st.session_state:
+    st.session_state.total_info = 0
 
-# =====================
-# 2. LOAD BANK SOAL
-# =====================
-@st.cache_data(ttl=300)
-def load_bank():
+# --- 3. FUNGSI AMBIL & KIRIM DATA ---
+@st.cache_data(ttl=60)
+def ambil_bank_soal():
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
     try:
-        r = requests.get(API_URL)
-        data = r.json()
-        for i in data:
-            i["a"] = float(i["a"])
-            i["b"] = float(i["b"])
-            i["c"] = float(i["c"])
-        return data
-    except Exception as e:
-        st.error(f"Gagal memuat bank soal: {e}")
+        response = requests.get(url_script)
+        return response.json()
+    except:
         return []
 
-# =====================
-# 3. IRT & CAT LOGIC
-# =====================
-def prob(theta, a, b, c):
-    return c + (1 - c) / (1 + math.exp(-a * (theta - b)))
+def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
+    try:
+        requests.post(url_script, json=payload)
+    except:
+        pass
 
-def information(theta, a, b, c):
-    p = prob(theta, a, b, c)
-    q = 1 - p
-    if p <= 1e-9 or q <= 1e-9: return 0
-    return (a**2 * (p - c)**2) / ((1 - c)**2 * p * q)
+# Load Soal
+if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
+    st.session_state.bank_soal = ambil_bank_soal()
 
-def select_next_item(theta, bank, used_ids):
-    best_item = None
-    max_info = -1
-    for item in bank:
-        if item["id"] in used_ids:
-            continue
-        info = information(theta, item["a"], item["b"], item["c"])
-        if info > max_info:
-            max_info = info
-            best_item = item
-    return best_item
+# --- 4. LOGIKA PSIKOMETRI ---
+def hitung_prob_3pl(theta, a, b, c):
+    return c + (1 - c) / (1 + np.exp(-a * (theta - b)))
 
-def update_theta_simple(theta, responses):
-    # Logika sederhana: naik/turun berdasarkan jawaban terakhir
-    # Ganti dengan MLE jika Anda sudah memiliki rumusnya
-    if not responses: return theta
-    last_res = responses[-1]
-    step = 0.4 if last_res == 1 else -0.4
-    return np.clip(theta + step, -3.0, 3.0)
+def hitung_iif(theta, a, b, c):
+    p = hitung_prob_3pl(theta, a, b, c)
+    return (a**2) * ((1-p)/p) * ((p - c) / (1 - c))**2
 
-def get_score(theta):
+def transform_ke_100(theta):
     return round(((np.clip(theta, -3, 3) + 3) / 6) * 100, 2)
 
-# =====================
-# 4. ALUR APLIKASI
-# =====================
-bank = load_bank()
+# --- 5. ANTARMUKA ---
+if not st.session_state.identitas_siap:
+    # HALAMAN LOGIN
+    st.markdown("<h1 style='text-align: center; color: #1a4d2e;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
+    with st.columns([1, 2, 1])[1]:
+        with st.form("login_form"):
+            nama = st.text_input("Nama Lengkap - HURUF BESAR TANPA GELAR")
+            nip = st.text_input("Nomor Peserta")
+            if st.form_submit_button("Mulai Tes"):
+                if nama and nip and st.session_state.bank_soal:
+                    st.session_state.nama, st.session_state.nip = nama, nip
+                    st.session_state.identitas_siap = True
+                    st.session_state.start_time = time.time()
+                    st.rerun()
+                else: st.error("Lengkapi data diri atau cek koneksi Bank Soal.")
+else:
+    # HEADER DENGAN TIMER
+    elapsed = time.time() - st.session_state.start_time
+    rem = max(0, 60 - int(elapsed))
+    
+    col_t, col_p = st.columns([3, 1])
+    col_t.title("🛡️ CAT Online")
+    col_p.markdown(f"<div style='text-align:left; border-left: 3px solid #ffffff; padding-left: 10px;'><b>👤 {st.session_state.nama}</b><br><span style='font-size:40px; color:{'blue' if rem < 10 else '#ffffff'};'>⏱️ {rem} s</span></div>", unsafe_allow_html=True)
+    
+    st.progress(st.session_state.index_soal / len(st.session_state.bank_soal))
 
-# LOGIN SCREEN
-if "nama" not in st.session_state:
-    st.title("Login CAT")
-    nama = st.text_input("Nama")
-    nip = st.text_input("Nomor Peserta")
-    if st.button("Mulai Tes"):
-        if nama and nip:
-            st.session_state.nama = nama
-            st.session_state.nip = nip
+    if st.session_state.index_soal < len(st.session_state.bank_soal):
+        if rem <= 0:
+            st.session_state.index_soal += 1
             st.session_state.start_time = time.time()
             st.rerun()
-        else:
-            st.warning("Isi nama dan nomor peserta!")
-    st.stop()
 
-# TEST SCREEN
-elapsed = time.time() - st.session_state.start_time
-sisa_waktu = max(0, TIME_LIMIT - int(elapsed))
-
-if st.session_state.index >= MAX_SOAL or sisa_waktu <= 0:
-    st.success("Tes Selesai!")
-    final_score = get_score(st.session_state.theta)
-    st.metric("Skor Akhir", final_score)
-    # Tampilkan tombol restart jika perlu
-    if st.button("Ulangi Tes"):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
+        # Adaptive Selection
+        sisa = [s for s in st.session_state.bank_soal if s['id'] not in [x['id'] for x in st.session_state.soal_selesai]]
+        soal = min(sisa, key=lambda x: abs(x['b'] - st.session_state.theta))
+        
+        st.subheader(f"Pertanyaan {st.session_state.index_soal + 1}")
+        st.info(soal['teks'])
+        
+        opsi = [f"A. {soal['opsi_A']}", f"B. {soal['opsi_B']}", f"C. {soal['opsi_C']}", f"D. {soal['opsi_D']}"]
+        pilihan = st.radio("Jawaban Anda:", opsi, index=None)
+        
+        if st.button("Simpan Jawaban & Lanjutkan"):
+            if pilihan:
+                skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
+                st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+                st.session_state.soal_selesai.append(soal)
+                st.session_state.index_soal += 1
+                st.session_state.start_time = time.time()
+                st.rerun()
+        
+        time.sleep(1)
         st.rerun()
-    st.stop()
-
-# Ambil ID yang sudah digunakan
-used_ids = [x["id"] for x in st.session_state.items_history]
-soal_saat_ini = select_next_item(st.session_state.theta, bank, used_ids)
-
-if soal_saat_ini:
-    st.title("CAT Online")
-    cols = st.columns(2)
-    cols[0].write(f"**Peserta:** {st.session_state.nama}")
-    cols[1].write(f"**Sisa Waktu:** {sisa_waktu} detik")
-    
-    st.divider()
-    st.subheader(f"Soal ke-{st.session_state.index + 1}")
-    st.write(soal_saat_ini["teks"])
-
-    opsi = [
-        f"A. {soal_saat_ini['opsi_A']}",
-        f"B. {soal_saat_ini['opsi_B']}",
-        f"C. {soal_saat_ini['opsi_C']}",
-        f"D. {soal_saat_ini['opsi_D']}"
-    ]
-
-    pilih = st.radio("Pilih Jawaban:", opsi, index=None)
-
-    if st.button("Simpan & Lanjut"):
-        if pilih:
-            # Hitung skor (cek apakah huruf awal pilihan sesuai kunci)
-            is_correct = 1 if pilih.startswith(soal_saat_ini["kunci"]) else 0
-            
-            # Simpan history
-            st.session_state.responses.append(is_correct)
-            st.session_state.items_history.append(soal_saat_ini)
-            
-            # Update kemampuan (theta)
-            st.session_state.theta = update_theta_simple(
-                st.session_state.theta, 
-                st.session_state.responses
-            )
-            
-            # Progres ke soal berikutnya
-            st.session_state.index += 1
-            st.session_state.start_time = time.time() # Reset timer per soal jika perlu
-            st.rerun()
-        else:
-            st.error("Pilih jawaban terlebih dahulu!")
-else:
-    st.error("Bank soal habis atau tidak ditemukan.")
+    else:
+        # HASIL AKHIR
+        skor = transform_ke_100(st.session_state.theta)
+        st.balloons()
+        st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
+        st.metric("SKOR FINAL ANDA", f"{skor}")
+        
+        if 'sent' not in st.session_state:
+            rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
+            sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
+            st.session_state.sent = True
+        st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
