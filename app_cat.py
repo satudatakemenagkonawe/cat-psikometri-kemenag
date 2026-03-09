@@ -17,6 +17,8 @@ TIME_LIMIT=60
 # SESSION INITIALIZER (WAJIB UNTUK CAT)
 # ======================================
 
+if 'items' not in st.session_state:
+        st.session_state.items = [] # atau muat data Anda di sini
 def init_session():
 
     defaults = {
@@ -32,9 +34,7 @@ def init_session():
         if k not in st.session_state:
             st.session_state[k] = v
     init_session()
-    if "items_history" not in st.session_state:
-        st.session_state.items_history = []
-
+    
 # =====================
 # LOAD BANK SOAL
 # =====================
@@ -266,7 +266,7 @@ else:
 
         st.session_state.responses.append(skor)
 
-        st.session_state.items_history.append(soal)
+        st.session_state.items.append(soal)
 
         st.session_state.theta=update_theta(
             st.session_state.theta,
@@ -279,6 +279,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
