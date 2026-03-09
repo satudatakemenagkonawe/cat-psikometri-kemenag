@@ -6,27 +6,40 @@ import json
 import math
 import os
 
-# ================================
-# KONFIGURASI
-# ================================
+st.set_page_config(page_title="CAT Online", layout="wide")
 
-st.set_page_config(page_title="Tes CAT Online", layout="wide")
+SESSION_FILE="cat_session.json"
 
-SESSION_FILE = "cat_session.json"
+THETA_MIN=-4
+THETA_MAX=4
 
-THETA_MIN = -4
-THETA_MAX = 4
+MAX_ITEMS=30
+SE_THRESHOLD=0.30
+EXPOSURE_LIMIT=0.25
 
-MAX_ITEMS = 30
-SE_THRESHOLD = 0.30
-EXPOSURE_LIMIT = 0.25
-
-SERVER_TIME_LIMIT = 60
+TIME_LIMIT=60
 
 
-# ================================
-# SESSION PERSISTENCE
-# ================================
+# =============================
+# SESSION SAVE / LOAD
+# =============================
+
+def save_session():
+
+    data={
+        "identitas_siap":st.session_state.identitas_siap,
+        "nama":st.session_state.get("nama",""),
+        "nip":st.session_state.get("nip",""),
+        "theta":float(st.session_state.theta),
+        "index_soal":int(st.session_state.index_soal),
+        "responses":st.session_state.responses,
+        "items":st.session_state.items,
+        "start_server":float(st.session_state.start_server)
+    }
+
+    with open(SESSION_FILE,"w") as f:
+        json.dump(data,f)
+
 
 def load_session():
 
@@ -38,106 +51,72 @@ def load_session():
     return None
 
 
-def save_session(data):
-
-    safe_data = json.loads(json.dumps(data, default=str))
-
-    with open(SESSION_FILE,"w") as f:
-        json.dump(safe_data,f)
-
-    saved = load_session()
-
-    if saved:
-        for k,v in saved.items():
-            st.session_state[k] = v
-
-# ================================
-# AMBIL BANK SOAL
-# ================================
+# =============================
+# LOAD BANK SOAL
+# =============================
 
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
 
-    url_script="https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    url="https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
 
     try:
+        r=requests.get(url)
+        data=r.json()
 
-        r=requests.get(url_script)
+        for i in data:
 
-        return r.json()
+            i["a"]=float(i["a"])
+            i["b"]=float(i["b"])
+            i["c"]=float(i["c"])
+
+        return data
 
     except:
-
         return []
 
 
-# ================================
-# KIRIM HASIL
-# ================================
-
-def kirim_ke_sheets(nama,nip,theta,rel,sem,skor):
-
-    url_script="https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
-
-    payload={
-        "nama":nama,
-        "nip":nip,
-        "theta":theta,
-        "rel":rel,
-        "sem":sem,
-        "skor_akhir":skor
-    }
-
-    try:
-        requests.post(url_script,json=payload)
-    except:
-        pass
-
-
-# ================================
-# IRT 3PL PROBABILITY
-# ================================
+# =============================
+# IRT 3PL
+# =============================
 
 def irt_probability(theta,a,b,c):
 
-    return c + (1-c)/(1+math.exp(-a*(theta-b)))
+    return c+(1-c)/(1+math.exp(-a*(theta-b)))
 
-
-# ================================
-# ITEM INFORMATION
-# ================================
 
 def item_information(theta,a,b,c):
 
     p=irt_probability(theta,a,b,c)
+
     q=1-p
 
-    if p==0 or q==0:
+    if p<=0 or q<=0:
         return 0
 
-    info=(a**2*(p-c)**2)/((1-c)**2*p*q)
+    info=(a*a*(p-c)*(p-c))/((1-c)*(1-c)*p*q)
 
     return info
 
 
-# ================================
-# PILIH SOAL (FISHER INFORMATION)
-# ================================
+# =============================
+# SELECT ITEM
+# =============================
 
 def pilih_soal(theta,bank,used):
 
     best=None
-    max_info=-999
+    max_info=-1
 
     for item in bank:
 
-        if item['id'] in used:
+        if item["id"] in used:
             continue
 
         if item.get("exposure",0)>=EXPOSURE_LIMIT:
             continue
 
-        info=item_information(theta,item['a'],item['b'],item['c'])
+        info=item_information(theta,item["a"],item["b"],item["c"])
 
         if info>max_info:
 
@@ -146,48 +125,54 @@ def pilih_soal(theta,bank,used):
 
     if best is None:
 
-        best=np.random.choice(bank)
+        sisa=[x for x in bank if x["id"] not in used]
+
+        if len(sisa)>0:
+            best=np.random.choice(sisa)
+        else:
+            best=np.random.choice(bank)
 
     return best
 
 
-# ================================
-# UPDATE THETA (NEWTON RAPHSON)
-# ================================
+# =============================
+# UPDATE THETA
+# =============================
 
 def update_theta(theta,responses,items):
 
-    numerator=0
-    denominator=0
+    num=0
+    den=0
 
     for i in range(len(responses)):
 
         item=items[i]
 
-        a=item['a']
-        b=item['b']
-        c=item['c']
+        a=item["a"]
+        b=item["b"]
+        c=item["c"]
 
         u=responses[i]
 
         p=irt_probability(theta,a,b,c)
+
         q=1-p
 
-        numerator+=a*(u-p)
-        denominator+=(a**2)*p*q
+        num+=a*(u-p)
+        den+=a*a*p*q
 
-    if denominator!=0:
+    if den!=0:
 
-        theta=theta+(numerator/denominator)
+        theta=theta+(num/den)
 
     theta=max(THETA_MIN,min(THETA_MAX,theta))
 
     return theta
 
 
-# ================================
+# =============================
 # STANDARD ERROR
-# ================================
+# =============================
 
 def standard_error(theta,items):
 
@@ -197,9 +182,9 @@ def standard_error(theta,items):
 
         info_sum+=item_information(
             theta,
-            item['a'],
-            item['b'],
-            item['c']
+            item["a"],
+            item["b"],
+            item["c"]
         )
 
     if info_sum==0:
@@ -208,58 +193,53 @@ def standard_error(theta,items):
     return 1/math.sqrt(info_sum)
 
 
-# ================================
+# =============================
 # SKOR
-# ================================
+# =============================
 
-def transform_ke_100(theta):
+def score(theta):
 
     return round(((np.clip(theta,-3,3)+3)/6)*100,2)
 
 
-# ================================
-# LOAD BANK SOAL
-# ================================
-
-if "bank_soal" not in st.session_state:
-
-    st.session_state.bank_soal=ambil_bank_soal()
-
-
-# ================================
-# LOAD SESSION
-# ================================
+# =============================
+# INIT SESSION
+# =============================
 
 saved=load_session()
 
 if saved and "identitas_siap" not in st.session_state:
 
-    st.session_state.update(saved)
+    for k,v in saved.items():
+        st.session_state[k]=v
 
 
-# ================================
-# INIT STATE
-# ================================
-
-if 'identitas_siap' not in st.session_state:
+if "identitas_siap" not in st.session_state:
     st.session_state.identitas_siap=False
 
-if 'theta' not in st.session_state:
+if "theta" not in st.session_state:
     st.session_state.theta=0.0
 
-if 'index_soal' not in st.session_state:
+if "index_soal" not in st.session_state:
     st.session_state.index_soal=0
 
-if 'responses' not in st.session_state:
+if "responses" not in st.session_state:
     st.session_state.responses=[]
 
-if 'soal_selesai' not in st.session_state:
-    st.session_state.soal_selesai=[]
+if "items" not in st.session_state:
+    st.session_state.items=[]
 
 
-# ================================
+# =============================
+# LOAD BANK
+# =============================
+
+bank=ambil_bank_soal()
+
+
+# =============================
 # LOGIN
-# ================================
+# =============================
 
 if not st.session_state.identitas_siap:
 
@@ -272,7 +252,7 @@ if not st.session_state.identitas_siap:
 
         if st.form_submit_button("Mulai Tes"):
 
-            if nama and nip:
+            if nama and nip and len(bank)>0:
 
                 st.session_state.nama=nama
                 st.session_state.nip=nip
@@ -280,33 +260,26 @@ if not st.session_state.identitas_siap:
 
                 st.session_state.start_server=time.time()
 
-                save_session({
-                    "identitas_siap": st.session_state.identitas_siap,
-                    "nama": st.session_state.nama,
-                    "nip": st.session_state.nip,
-                    "theta": float(st.session_state.theta),
-                    "index_soal": int(st.session_state.index_soal),
-                    "responses": st.session_state.responses,
-                    "soal_selesai": st.session_state.soal_selesai,
-                    "start_server": float(st.session_state.start_server)
-                })
+                save_session()
+
                 st.rerun()
 
 
-# ================================
+# =============================
 # HALAMAN TES
-# ================================
+# =============================
 
 else:
 
     elapsed=time.time()-st.session_state.start_server
-    sisa=max(0,SERVER_TIME_LIMIT-int(elapsed))
 
-    st.title("🛡️ CAT Online")
+    sisa=max(0,TIME_LIMIT-int(elapsed))
+
+    st.title("CAT Online")
 
     st.write("Peserta :",st.session_state.nama)
 
-    st.write("Sisa waktu :",sisa,"detik")
+    st.write("Sisa waktu :",sisa)
 
     st.progress(st.session_state.index_soal/MAX_ITEMS)
 
@@ -314,33 +287,28 @@ else:
 
         st.session_state.index_soal+=1
         st.session_state.start_server=time.time()
+
+        save_session()
+
         st.rerun()
 
 
     se=standard_error(
         st.session_state.theta,
-        st.session_state.soal_selesai
+        st.session_state.items
     )
 
     if se<SE_THRESHOLD or st.session_state.index_soal>=MAX_ITEMS:
 
-        skor=transform_ke_100(st.session_state.theta)
+        skor=score(st.session_state.theta)
 
-        rel=1-(se**2)
-        sem=se
+        rel=1-(se*se)
 
         st.success("Tes selesai")
 
         st.metric("Skor akhir",skor)
 
-        kirim_ke_sheets(
-            st.session_state.nama,
-            st.session_state.nip,
-            st.session_state.theta,
-            rel,
-            sem,
-            skor
-        )
+        st.write("Reliabilitas :",round(rel,3))
 
         if os.path.exists(SESSION_FILE):
             os.remove(SESSION_FILE)
@@ -348,61 +316,47 @@ else:
         st.stop()
 
 
-    used=[x['id'] for x in st.session_state.soal_selesai]
+    used=[x["id"] for x in st.session_state.items]
 
     soal=pilih_soal(
         st.session_state.theta,
-        st.session_state.bank_soal,
+        bank,
         used
     )
 
-    if "exposure" not in soal:
-        soal["exposure"]=0
+    st.subheader("Soal "+str(st.session_state.index_soal+1))
 
-    soal["exposure"]+=0.01
-
-
-    st.subheader(
-        f"Soal {st.session_state.index_soal+1}"
-    )
-
-    st.write(soal['teks'])
+    st.write(soal["teks"])
 
     opsi=[
-        f"A. {soal['opsi_A']}",
-        f"B. {soal['opsi_B']}",
-        f"C. {soal['opsi_C']}",
-        f"D. {soal['opsi_D']}"
+        "A. "+soal["opsi_A"],
+        "B. "+soal["opsi_B"],
+        "C. "+soal["opsi_C"],
+        "D. "+soal["opsi_D"]
     ]
 
-    pilihan=st.radio(
-        "Jawaban Anda",
-        opsi,
-        index=None
-    )
-
+    pilih=st.radio("Jawaban",opsi,index=None)
 
     if st.button("Simpan Jawaban"):
 
-        if pilihan:
+        if pilih:
 
-            skor_biner=1 if pilihan.startswith(soal['kunci']) else 0
+            skor_biner=1 if pilih.startswith(soal["kunci"]) else 0
 
             st.session_state.responses.append(skor_biner)
 
-            st.session_state.soal_selesai.append(soal)
+            st.session_state.items.append(soal)
 
             st.session_state.theta=update_theta(
                 st.session_state.theta,
                 st.session_state.responses,
-                st.session_state.soal_selesai
+                st.session_state.items
             )
 
             st.session_state.index_soal+=1
 
             st.session_state.start_server=time.time()
 
-            save_session(st.session_state)
+            save_session()
 
             st.rerun()
-
