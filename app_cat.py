@@ -22,18 +22,18 @@ def init_session():
     defaults = {
         "theta": 0,
         "se": 999,
-        "item": [],
+        "item_history": [],
         "answers": {},
         "start_time": None,
         "finished": False
     }
 
-    for k,v in defaults.item():
+    for k,v in defaults.item_history():
         if k not in st.session_state:
             st.session_state[k] = v
     init_session()
-    if "item_history" not in st.session_state:
-        st.session_state.item_history = []
+    if "item_history_history" not in st.session_state:
+        st.session_state.item_history_history = []
 
 # =====================
 # LOAD BANK SOAL
@@ -80,22 +80,22 @@ def information(theta,a,b,c):
 # SELECT ITEM
 # =====================
 
-def select_item(theta,bank,used):
+def select_item_history(theta,bank,used):
 
     best=None
     max_info=-1
 
-    for item in bank:
+    for item_history in bank:
 
-        if item["id"] in used:
+        if item_history["id"] in used:
             continue
 
-        info=information(theta,item["a"],item["b"],item["c"])
+        info=information(theta,item_history["a"],item_history["b"],item_history["c"])
 
         if info>max_info:
 
             max_info=info
-            best=item
+            best=item_history
 
     return best
 
@@ -104,18 +104,18 @@ def select_item(theta,bank,used):
 # UPDATE THETA
 # =====================
 
-def update_theta(theta,responses,item):
+def update_theta(theta,responses,item_history):
 
     num=0
     den=0
 
     for i in range(len(responses)):
 
-        item=item[i]
+        items =item_history[i]
 
-        a=item["a"]
-        b=item["b"]
-        c=item["c"]
+        a=item_history["a"]
+        b=item_history["b"]
+        c=item_history["c"]
 
         u=responses[i]
 
@@ -137,13 +137,13 @@ def update_theta(theta,responses,item):
 # STANDARD ERROR
 # =====================
 
-def se(theta,item):
+def se(theta,item_history):
 
     info=0
 
-    for item in item:
+    for item_history in item_history:
 
-        info+=information(theta,item["a"],item["b"],item["c"])
+        info+=information(theta,item_history["a"],item_history["b"],item_history["c"])
 
     if info==0:
         return 999
@@ -176,7 +176,7 @@ if "session_id" not in st.session_state:
 
     st.session_state.responses=[]
 
-    st.session_state.item_history=[]
+    st.session_state.item_history_history=[]
 
     st.session_state.start=time.time()
 
@@ -237,16 +237,16 @@ else:
 
 
     # memastikan session selalu valid
-    if "item" not in st.session_state or not isinstance(st.session_state.item_history, list):
-        st.session_state.item_history = []
+    if "item_history" not in st.session_state or not isinstance(st.session_state.item_history_history, list):
+        st.session_state.item_history_history = []
 
-    used = [x["id"] for x in st.session_state.item_history if isinstance(x, dict) and "id" in x]
-    soal=select_item(
+    used = [x["id"] for x in st.session_state.item_history_history if isinstance(x, dict) and "id" in x]
+    soal=select_item_history(
         st.session_state.theta,
         bank,
         used
     )
-    st.write(type(st.session_state.item_history))
+    st.write(type(st.session_state.item_history_history))
     st.subheader("Soal "+str(st.session_state.index+1))
 
     st.write(soal["teks"])
@@ -266,12 +266,12 @@ else:
 
         st.session_state.responses.append(skor)
 
-        st.session_state.item_history.append(soal)
+        st.session_state.item_history_history.append(soal)
 
         st.session_state.theta=update_theta(
             st.session_state.theta,
             st.session_state.responses,
-            st.session_state.item_history
+            st.session_state.item_history_history
         )
 
         st.session_state.index+=1
@@ -279,7 +279,6 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
-
 
 
 
