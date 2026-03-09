@@ -31,6 +31,8 @@ def init_session():
     for k,v in defaults.items():
         if k not in st.session_state:
             st.session_state[k] = v
+    if "item_history" not in st.session_state:
+    st.session_state.item_history = []
 
 init_session()
 
@@ -265,7 +267,7 @@ else:
 
         st.session_state.responses.append(skor)
 
-        st.session_state.items.append(soal)
+        st.session_state.item_history.append(soal)
 
         st.session_state.theta=update_theta(
             st.session_state.theta,
@@ -278,6 +280,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
