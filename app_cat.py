@@ -129,7 +129,7 @@ if not st.session_state.identitas_siap:
 else:
     # HEADER DENGAN TIMER
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 60 - int(elapsed))
+    rem = max(0, 20 - int(elapsed))
     
     col_t, col_p = st.columns([3, 1])
     col_t.title("🛡️ CAT Online")
@@ -179,3 +179,4 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
