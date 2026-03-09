@@ -111,7 +111,7 @@ def update_theta(theta,responses,items):
 
     for i in range(len(responses)):
 
-        items =items[i]
+        items =item[i]
 
         a=items["a"]
         b=items["b"]
@@ -279,6 +279,7 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
+
 
 
 
