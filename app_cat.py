@@ -9,7 +9,7 @@ st.set_page_config(page_title="CAT Online",layout="wide")
 
 API_URL="https://script.google.com/macros/s/AKfycbwtdEei5DFD95dlEvegxqS1oorA7Nr1H44k2s6SqysuvomcSH119cbV04gvt40h5A_qrA/exec"
 
-MAX_ITEMS=30
+MAX_THETA=30
 SE_THRESHOLD=0.30
 TIME_LIMIT=60
 
@@ -22,13 +22,13 @@ def init_session():
     defaults = {
         "theta": 0,
         "se": 999,
-        "items": [],
+        "theta": [],
         "answers": {},
         "start_time": None,
         "finished": False
     }
 
-    for k,v in defaults.items():
+    for k,v in defaults.theta():
         if k not in st.session_state:
             st.session_state[k] = v
     init_session()
@@ -104,14 +104,14 @@ def select_item(theta,bank,used):
 # UPDATE THETA
 # =====================
 
-def update_theta(theta,responses,items):
+def update_theta(theta,responses,theta):
 
     num=0
     den=0
 
     for i in range(len(responses)):
 
-        item=items[i]
+        item=theta[i]
 
         a=item["a"]
         b=item["b"]
@@ -137,11 +137,11 @@ def update_theta(theta,responses,items):
 # STANDARD ERROR
 # =====================
 
-def se(theta,items):
+def se(theta,theta):
 
     info=0
 
-    for item in items:
+    for item in theta:
 
         info+=information(theta,item["a"],item["b"],item["c"])
 
@@ -225,7 +225,7 @@ else:
         st.rerun()
 
 
-    if st.session_state.index>=MAX_ITEMS:
+    if st.session_state.index>=MAX_THETA:
 
         final=score(st.session_state.theta)
 
@@ -237,7 +237,7 @@ else:
 
 
     # memastikan session selalu valid
-    if "items" not in st.session_state or not isinstance(st.session_state.item_history, list):
+    if "theta" not in st.session_state or not isinstance(st.session_state.item_history, list):
         st.session_state.item_history = []
 
     used = [x["id"] for x in st.session_state.item_history if isinstance(x, dict) and "id" in x]
@@ -279,7 +279,6 @@ else:
         st.session_state.start=time.time()
 
         st.rerun()
-
 
 
 
