@@ -199,33 +199,34 @@ else:
         # --- BAGIAN HASIL AKHIR ---
         if len(st.session_state.soal_selesai) >= 25:
             skor = transform_ke_100(st.session_state.theta)
-                st.balloons()
-                st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
-                st.metric("SKOR FINAL ANDA", f"{skor}")
+            st.balloons()
+            st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
+            st.metric("SKOR FINAL ANDA", f"{skor}")
 
-        # Logika Pengiriman Otomatis (Hanya berjalan sekali berkat state 'sent')
-        if 'sent' not in st.session_state:
-        # 1. Hitung Reliabilitas dan SEM
-            rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
-            sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+            # Logika Pengiriman Otomatis (Hanya berjalan sekali berkat state 'sent')
+            if 'sent' not in st.session_state:
+                # 1. Hitung Reliabilitas dan SEM
+                rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
+                sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
         
-        # 2. SUSUN DAFTAR 25 JAWABAN (Logika Baru)
-        # Mengambil jawaban dari nomor 1 sampai 25
-        daftar_25_jawaban = [st.session_state.jawaban_per_nomor.get(i, "") for i in range(1, 26)]
+                # 2. SUSUN DAFTAR 25 JAWABAN (Logika Baru)
+                # Mengambil jawaban dari nomor 1 sampai 25
+                daftar_25_jawaban = [st.session_state.jawaban_per_nomor.get(i, "") for i in range(1, 26)]
         
-        # 3. KIRIM KE SHEETS (Dengan parameter tambahan daftar_25_jawaban)
-        try:
-            kirim_ke_sheets(
-                st.session_state.nama, 
-                st.session_state.nip, 
-                st.session_state.theta, 
-                rel, 
-                sem, 
-                skor, 
-                daftar_25_jawaban  # Pastikan fungsi kirim_ke_sheets sudah diupdate
-            )
-            st.session_state.sent = True
-            st.info("Hasil dan pilihan jawaban telah dikirimkan secara otomatis ke Database Pusat.")
-        except Exception as e:
-            st.error(f"Gagal mengirim ke database: {e}")
+                # 3. KIRIM KE SHEETS (Dengan parameter tambahan daftar_25_jawaban)
+                try:
+                    kirim_ke_sheets(
+                        st.session_state.nama, 
+                        st.session_state.nip, 
+                        st.session_state.theta, 
+                        rel, 
+                        sem, 
+                        skor, 
+                        daftar_25_jawaban  # Pastikan fungsi kirim_ke_sheets sudah diupdate
+                    )
+                    st.session_state.sent = True
+                    st.info("Hasil dan pilihan jawaban telah dikirimkan secara otomatis ke Database Pusat.")
+                except Exception as e:
+                    st.error(f"Gagal mengirim ke database: {e}")
+
 
