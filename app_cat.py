@@ -113,12 +113,13 @@ def transform_ke_100(theta):
 
 # --- 5. ANTARMUKA ---
 if not st.session_state.identitas_siap:
+    
     # HALAMAN LOGIN
     st.markdown("<h1 style='text-align: center; color: #1a4d2e;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
     with st.columns([1, 2, 1])[1]:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap - HURUF BESAR TANPA GELAR")
-            nip = st.text_input("Nomor Peserta")
+            nip = st.text_input("NIP")
             if st.form_submit_button("Mulai Tes"):
                 if nama and nip and st.session_state.bank_soal:
                     st.session_state.nama, st.session_state.nip = nama, nip
@@ -179,4 +180,5 @@ else:
             kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
             st.session_state.sent = True
         st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
+
 
