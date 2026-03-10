@@ -172,26 +172,26 @@ else:
         
                 # Gunakan index_soal + 1 agar nomor soal di Sheet mulai dari 1, 2, 3...
                 no_soal_saat_ini = st.session_state.index_soal + 1
-                    st.session_state.jawaban_per_nomor[no_soal_saat_ini] = pilihan[0]
+                st.session_state.jawaban_per_nomor[no_soal_saat_ini] = pilihan[0]
 
                 # 2. LOGIKA IRT/THETA (Dipertahankan untuk menghitung skor)
-                    skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
+                skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
         
                 # Menghitung Information Function (IIF)
-                    st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
         
                 # Menghitung Probabilitas jawaban benar (3PL)
-                    p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+                p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
         
                 # Update Kemampuan (Theta) peserta berdasarkan jawaban tadi
-                    st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+                st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
         
                 # 3. MANAGEMENT STATE (Pindah ke soal berikutnya)
-                    st.session_state.soal_selesai.append(soal)
-                    st.session_state.index_soal += 1
-                    st.session_state.start_time = time.time() # Reset waktu untuk soal berikutnya
+                st.session_state.soal_selesai.append(soal)
+                st.session_state.index_soal += 1
+                st.session_state.start_time = time.time() # Reset waktu untuk soal berikutnya
         
-                    st.rerun() # Refresh halaman untuk menampilkan soal baru
+                st.rerun() # Refresh halaman untuk menampilkan soal baru
         
         time.sleep(1)
         st.rerun()
@@ -228,3 +228,4 @@ else:
             st.info("Hasil dan pilihan jawaban telah dikirimkan secara otomatis ke Database Pusat.")
         except Exception as e:
             st.error(f"Gagal mengirim ke database: {e}")
+
