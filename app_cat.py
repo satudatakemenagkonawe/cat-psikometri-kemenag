@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import requests
+import json
 import time
 
 # --- 1. KONFIGURASI HALAMAN ---
@@ -81,20 +82,29 @@ if 'total_info' not in st.session_state:
 # --- 3. FUNGSI AMBIL & KIRIM DATA ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbxke_3b68jKV5u2EgpZ2-S7aNhmiq-XOvvRybpporTJWf4e_T1SY0aCRqR7nDduDLGMjg/exec"
     try:
         response = requests.get(url_script)
         return response.json()
     except:
         return []
 
-def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
-    payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
+def kirim_ke_sheets(nama, nip, theta, rel, sem, skor, jawaban_list):
+    url_script = "URL_APPS_SCRIPT_ANDA" # Ganti dengan URL /exec terbaru
+    payload = {
+        "session_id": st.session_state.get('session_id', 'code01'),
+        "nama": nama, 
+        "nip": nip, 
+        "theta": theta,
+        "rel": rel, 
+        "sem": sem, 
+        "skor_akhir": skor,
+        "jawaban": jawaban_list  # Mengirim List 25 jawaban
+    }
     try:
         requests.post(url_script, json=payload)
     except:
-        pass
+        pass        
 
 # Load Soal
 if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
@@ -156,29 +166,65 @@ else:
         
         if st.button("Simpan Jawaban & Lanjutkan"):
             if pilihan:
-                skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
-                st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-                st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
-                st.session_state.soal_selesai.append(soal)
-                st.session_state.index_soal += 1
-                st.session_state.start_time = time.time()
-                st.rerun()
+                # 1. CATAT JAWABAN (Untuk Google Sheets nanti)
+                if 'jawaban_per_nomor' not in st.session_state:
+                    st.session_state.jawaban_per_nomor = {}
+        
+                # Gunakan index_soal + 1 agar nomor soal di Sheet mulai dari 1, 2, 3...
+                no_soal_saat_ini = st.session_state.index_soal + 1
+                    st.session_state.jawaban_per_nomor[no_soal_saat_ini] = pilihan[0]
+
+                # 2. LOGIKA IRT/THETA (Dipertahankan untuk menghitung skor)
+                    skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
+        
+                # Menghitung Information Function (IIF)
+                    st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+        
+                # Menghitung Probabilitas jawaban benar (3PL)
+                    p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
+        
+                # Update Kemampuan (Theta) peserta berdasarkan jawaban tadi
+                    st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
+        
+                # 3. MANAGEMENT STATE (Pindah ke soal berikutnya)
+                    st.session_state.soal_selesai.append(soal)
+                    st.session_state.index_soal += 1
+                    st.session_state.start_time = time.time() # Reset waktu untuk soal berikutnya
+        
+                    st.rerun() # Refresh halaman untuk menampilkan soal baru
         
         time.sleep(1)
         st.rerun()
     else:
-        # HASIL AKHIR
-        skor = transform_ke_100(st.session_state.theta)
-        st.balloons()
-        st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
-        st.metric("SKOR FINAL ANDA", f"{skor}")
-        
+        # --- BAGIAN HASIL AKHIR ---
+        if len(st.session_state.soal_selesai) >= 25:
+            skor = transform_ke_100(st.session_state.theta)
+                st.balloons()
+                st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
+                st.metric("SKOR FINAL ANDA", f"{skor}")
+
+        # Logika Pengiriman Otomatis (Hanya berjalan sekali berkat state 'sent')
         if 'sent' not in st.session_state:
+        # 1. Hitung Reliabilitas dan SEM
             rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
             sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
-            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
+        
+        # 2. SUSUN DAFTAR 25 JAWABAN (Logika Baru)
+        # Mengambil jawaban dari nomor 1 sampai 25
+        daftar_25_jawaban = [st.session_state.jawaban_per_nomor.get(i, "") for i in range(1, 26)]
+        
+        # 3. KIRIM KE SHEETS (Dengan parameter tambahan daftar_25_jawaban)
+        try:
+            kirim_ke_sheets(
+                st.session_state.nama, 
+                st.session_state.nip, 
+                st.session_state.theta, 
+                rel, 
+                sem, 
+                skor, 
+                daftar_25_jawaban  # Pastikan fungsi kirim_ke_sheets sudah diupdate
+            )
             st.session_state.sent = True
-        st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
-
-
+            st.info("Hasil dan pilihan jawaban telah dikirimkan secara otomatis ke Database Pusat.")
+        except Exception as e:
+            st.error(f"Gagal mengirim ke database: {e}")
