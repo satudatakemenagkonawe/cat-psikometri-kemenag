@@ -82,7 +82,7 @@ if 'total_info' not in st.session_state:
 # --- 3. FUNGSI AMBIL & KIRIM DATA ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    url_script = "https://script.google.com/macros/s/AKfycby4ajhwBoWzZ3fnrszG60zKIfjIQRaSp55dOiAOk9XQAQdM8_n9tTLCUO7jGQ_jmW1mXw/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbyV_qRjLjaErsdTurdU0AW2ySSJ4mNZJjIyN6YpWw3mvCZ0fhL6DcdeAF76FLud2aAONg/exec"
     try:
         response = requests.get(url_script)
         return response.json()
@@ -90,7 +90,7 @@ def ambil_bank_soal():
         return []
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor, jawaban_list):
-    url_script = "URL_APPS_SCRIPT_ANDA" # Ganti dengan URL /exec terbaru
+    url_script = "https://script.google.com/macros/s/AKfycbyV_qRjLjaErsdTurdU0AW2ySSJ4mNZJjIyN6YpWw3mvCZ0fhL6DcdeAF76FLud2aAONg/exec" # Ganti dengan URL /exec terbaru
     payload = {
         "session_id": st.session_state.get('session_id', 'code01'),
         "nama": nama, 
@@ -228,6 +228,7 @@ else:
                     st.info("Hasil dan pilihan jawaban telah dikirimkan secara otomatis ke Database Pusat.")
                 except Exception as e:
                     st.error(f"Gagal mengirim ke database: {e}")
+
 
 
 
