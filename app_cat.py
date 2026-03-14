@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import requests
-import json
 import time
 
 # --- 1. KONFIGURASI HALAMAN ---
@@ -82,29 +81,20 @@ if 'total_info' not in st.session_state:
 # --- 3. FUNGSI AMBIL & KIRIM DATA ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    url_script = "https://script.google.com/macros/s/AKfycbyV_qRjLjaErsdTurdU0AW2ySSJ4mNZJjIyN6YpWw3mvCZ0fhL6DcdeAF76FLud2aAONg/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
     try:
         response = requests.get(url_script)
         return response.json()
     except:
         return []
 
-def kirim_ke_sheets(nama, nip, theta, rel, sem, skor, jawaban_list):
-    url_script = "https://script.google.com/macros/s/AKfycbyV_qRjLjaErsdTurdU0AW2ySSJ4mNZJjIyN6YpWw3mvCZ0fhL6DcdeAF76FLud2aAONg/exec" # Ganti dengan URL /exec terbaru
-    payload = {
-        "session_id": st.session_state.get('session_id', 'code01'),
-        "nama": nama, 
-        "nip": nip, 
-        "theta": theta,
-        "rel": rel, 
-        "sem": sem, 
-        "skor_akhir": skor,
-        "jawaban": jawaban_list  # Mengirim List 25 jawaban
-    }
+def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
+    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
     try:
         requests.post(url_script, json=payload)
     except:
-        pass        
+        pass
 
 # Load Soal
 if 'bank_soal' not in st.session_state or not st.session_state.bank_soal:
@@ -123,13 +113,12 @@ def transform_ke_100(theta):
 
 # --- 5. ANTARMUKA ---
 if not st.session_state.identitas_siap:
-    
     # HALAMAN LOGIN
     st.markdown("<h1 style='text-align: center; color: #1a4d2e;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
     with st.columns([1, 2, 1])[1]:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap - HURUF BESAR TANPA GELAR")
-            nip = st.text_input("NIP")
+            nip = st.text_input("Nomor Peserta")
             if st.form_submit_button("Mulai Tes"):
                 if nama and nip and st.session_state.bank_soal:
                     st.session_state.nama, st.session_state.nip = nama, nip
@@ -140,7 +129,7 @@ if not st.session_state.identitas_siap:
 else:
     # HEADER DENGAN TIMER
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 20 - int(elapsed))
+    rem = max(0, 60 - int(elapsed))
     
     col_t, col_p = st.columns([3, 1])
     col_t.title("🛡️ CAT Online")
@@ -166,69 +155,27 @@ else:
         
         if st.button("Simpan Jawaban & Lanjutkan"):
             if pilihan:
-                # 1. CATAT JAWABAN (Untuk Google Sheets nanti)
-                if 'jawaban_per_nomor' not in st.session_state:
-                    st.session_state.jawaban_per_nomor = {}
-        
-                # Gunakan index_soal + 1 agar nomor soal di Sheet mulai dari 1, 2, 3...
-                no_soal_saat_ini = st.session_state.index_soal + 1
-                st.session_state.jawaban_per_nomor[no_soal_saat_ini] = pilihan[0]
-
-                # 2. LOGIKA IRT/THETA (Dipertahankan untuk menghitung skor)
                 skor_biner = 1 if pilihan.startswith(soal['kunci']) else 0
-        
-                # Menghitung Information Function (IIF)
                 st.session_state.total_info += hitung_iif(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-        
-                # Menghitung Probabilitas jawaban benar (3PL)
                 p = hitung_prob_3pl(st.session_state.theta, soal['a'], soal['b'], soal['c'])
-        
-                # Update Kemampuan (Theta) peserta berdasarkan jawaban tadi
                 st.session_state.theta += (0.85 * soal['a'] * ((skor_biner - p) / (1 - soal['c'])))
-        
-                # 3. MANAGEMENT STATE (Pindah ke soal berikutnya)
                 st.session_state.soal_selesai.append(soal)
                 st.session_state.index_soal += 1
-                st.session_state.start_time = time.time() # Reset waktu untuk soal berikutnya
-        
-                st.rerun() # Refresh halaman untuk menampilkan soal baru
+                st.session_state.start_time = time.time()
+                st.rerun()
         
         time.sleep(1)
         st.rerun()
     else:
-        # --- BAGIAN HASIL AKHIR ---
-        if len(st.session_state.soal_selesai) >= 25:
-            skor = transform_ke_100(st.session_state.theta)
-            st.balloons()
-            st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
-            st.metric("SKOR FINAL ANDA", f"{skor}")
-
-            # Logika Pengiriman Otomatis (Hanya berjalan sekali berkat state 'sent')
-            if 'sent' not in st.session_state:
-                # 1. Hitung Reliabilitas dan SEM
-                rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
-                sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+        # HASIL AKHIR
+        skor = transform_ke_100(st.session_state.theta)
+        st.balloons()
+        st.success(f"Tes Selesai! Selamat, {st.session_state.nama}.")
+        st.metric("SKOR FINAL ANDA", f"{skor}")
         
-                # 2. SUSUN DAFTAR 25 JAWABAN (Logika Baru)
-                # Mengambil jawaban dari nomor 1 sampai 25
-                daftar_25_jawaban = [st.session_state.jawaban_per_nomor.get(i, "") for i in range(1, 26)]
-        
-                # 3. KIRIM KE SHEETS (Dengan parameter tambahan daftar_25_jawaban)
-                try:
-                    kirim_ke_sheets(
-                        st.session_state.nama, 
-                        st.session_state.nip, 
-                        st.session_state.theta, 
-                        rel, 
-                        sem, 
-                        skor, 
-                        daftar_25_jawaban  # Pastikan fungsi kirim_ke_sheets sudah diupdate
-                    )
-                    st.session_state.sent = True
-                    st.info("Hasil dan pilihan jawaban telah dikirimkan secara otomatis ke Database Pusat.")
-                except Exception as e:
-                    st.error(f"Gagal mengirim ke database: {e}")
-
-
-
-
+        if 'sent' not in st.session_state:
+            rel = st.session_state.total_info / (st.session_state.total_info + 1) if st.session_state.total_info > 0 else 0
+            sem = 1 / np.sqrt(st.session_state.total_info) if st.session_state.total_info > 0 else 0
+            kirim_ke_sheets(st.session_state.nama, st.session_state.nip, st.session_state.theta, rel, sem, skor)
+            st.session_state.sent = True
+        st.info("Hasil telah dikirimkan secara otomatis ke Database Pusat Data Penilaian.")
