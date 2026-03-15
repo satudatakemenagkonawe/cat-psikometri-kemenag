@@ -129,7 +129,7 @@ if not st.session_state.identitas_siap:
 else:
     # HEADER DENGAN TIMER
     elapsed = time.time() - st.session_state.start_time
-    rem = max(0, 60 - int(elapsed))
+    rem = max(0, 20 - int(elapsed))
     
     col_t, col_p = st.columns([3, 1])
     col_t.title("🛡️ CAT Online")
