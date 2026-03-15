@@ -118,7 +118,7 @@ if not st.session_state.identitas_siap:
     with st.columns([1, 2, 1])[1]:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap - HURUF BESAR TANPA GELAR")
-            nip = st.text_input("Nomor Peserta")
+            nip = st.text_input("NIP")
             if st.form_submit_button("Mulai Tes"):
                 if nama and nip and st.session_state.bank_soal:
                     st.session_state.nama, st.session_state.nip = nama, nip
