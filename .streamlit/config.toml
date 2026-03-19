@@ -1,6 +1,6 @@
 [theme]
-primaryColor = "#2E7D32" # Hijau Kemenag
-backgroundColor = "#FFFFFF"
+primaryColor = "#d5f2ea" # Hijau Kemenag
+backgroundColor = "#f2f2d5"
 secondaryBackgroundColor = "#F1F8E9"
 textColor = "#212121"
 font = "sans serif"
