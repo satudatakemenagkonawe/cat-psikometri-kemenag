@@ -114,7 +114,7 @@ def transform_ke_100(theta):
 # --- 5. ANTARMUKA ---
 if not st.session_state.identitas_siap:
     # HALAMAN LOGIN
-    st.markdown("<h1 style='text-align: center; color: #1a4d2e;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #ede60c;'>🛡️ Sistem CAT Kemenag Konawe</h1>", unsafe_allow_html=True)
     with st.columns([1, 2, 1])[1]:
         with st.form("login_form"):
             nama = st.text_input("Nama Lengkap - HURUF BESAR TANPA GELAR")
