@@ -81,7 +81,7 @@ if 'total_info' not in st.session_state:
 # --- 3. FUNGSI AMBIL & KIRIM DATA ---
 @st.cache_data(ttl=60)
 def ambil_bank_soal():
-    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbyV_qRjLjaErsdTurdU0AW2ySSJ4mNZJjIyN6YpWw3mvCZ0fhL6DcdeAF76FLud2aAONg/exec"
     try:
         response = requests.get(url_script)
         return response.json()
@@ -89,7 +89,7 @@ def ambil_bank_soal():
         return []
 
 def kirim_ke_sheets(nama, nip, theta, rel, sem, skor):
-    url_script = "https://script.google.com/macros/s/AKfycbzJXP_5EZMX56yP38-qxW919cJPGOC0KnX_HEtyXyKKMILViO0OTdwtpGH81MBZ7042Ng/exec"
+    url_script = "https://script.google.com/macros/s/AKfycbyV_qRjLjaErsdTurdU0AW2ySSJ4mNZJjIyN6YpWw3mvCZ0fhL6DcdeAF76FLud2aAONg/exec"
     payload = {"nama": nama, "nip": nip, "theta": theta, "rel": rel, "sem": sem, "skor_akhir": skor}
     try:
         requests.post(url_script, json=payload)
